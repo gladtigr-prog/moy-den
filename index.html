@@ -1,0 +1,1328 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Мой день">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Мой день</title>
+<style>
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--acc:#7c5cff;--acc-s:rgba(124,92,255,.16);--acc-m:rgba(124,92,255,.32);--danger:#ef4444;--ok:#22c55e;--warn:#f97316;--r:16px}
+body.dark{--bg:#0f1115;--card:#181b22;--card2:#21252e;--text:#eef0f4;--muted:#8a90a0;--line:#2a2f3a;--shadow:0 8px 30px rgba(0,0,0,.45);--scrim:rgba(0,0,0,.55)}
+body.light{--bg:#f3f4f8;--card:#ffffff;--card2:#eceef3;--text:#15171c;--muted:#6b7280;--line:#e1e4ea;--shadow:0 8px 30px rgba(20,20,50,.12);--scrim:rgba(20,20,40,.35)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Roboto","Segoe UI",sans-serif;font-size:15px;line-height:1.35;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+input,textarea,select{font:inherit;color:inherit;-webkit-user-select:text;user-select:text}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;display:block}
+.i.f{fill:currentColor;stroke:none}
+.i.s{width:15px;height:15px}
+#view{position:fixed;left:0;right:0;top:var(--sat);bottom:calc(64px + var(--sab));overflow-y:auto;padding:0 16px 96px;-webkit-overflow-scrolling:touch}
+#nav{position:fixed;left:0;right:0;bottom:0;height:calc(64px + var(--sab));padding-bottom:var(--sab);background:var(--bg);border-top:1px solid var(--line);display:flex;z-index:20}
+#nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:11px;font-weight:500;transition:color .2s}
+#nav button .pill{width:52px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+#nav button.on{color:var(--text)}
+#nav button.on .pill{background:var(--acc-s);color:var(--acc)}
+#fab{position:fixed;right:18px;bottom:calc(80px + var(--sab));width:58px;height:58px;border-radius:20px;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px var(--acc-m);z-index:21;transition:transform .15s}
+#fab:active{transform:scale(.92)}
+#fab .i{width:26px;height:26px;stroke-width:2.4}
+#fab.hide{display:none}
+
+.hero{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 0 14px;gap:10px}
+.h1{font-size:26px;font-weight:750;letter-spacing:-.4px}
+.h2{font-size:20px;font-weight:700}
+.sub{color:var(--muted);font-size:13.5px;margin-top:3px}
+.hbtns{display:flex;gap:6px}
+.ib{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--text);background:var(--card);flex:none}
+.ib.on{color:var(--acc);background:var(--acc-s)}
+.ib.plain{background:none}
+.ib:active,.btn:active,.chip:active{opacity:.7}
+
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.prog{display:flex;align-items:center;gap:16px}
+.ringw{position:relative;flex:none}
+.ringw .rl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.prog .pt{font-weight:650;font-size:16px}
+.prog .ps{display:flex;gap:14px;margin-top:8px;color:var(--muted);font-size:12.5px;flex-wrap:wrap}
+.prog .ps span{display:flex;align-items:center;gap:5px}
+
+.qa{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:14px;padding:4px 4px 4px 14px;margin-bottom:6px;border:1.5px solid transparent;transition:border-color .2s}
+.qa:focus-within{border-color:var(--acc)}
+.qa input{flex:1;background:none;border:0;outline:0;padding:10px 0;min-width:0}
+.qa input::placeholder{color:var(--muted)}
+.qa button{width:38px;height:38px;border-radius:11px;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center}
+.qa-prev{display:flex;flex-wrap:wrap;gap:6px;min-height:0;margin:0 0 8px}
+.qa-prev:empty{margin:0}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 8px;border-radius:8px;background:var(--acc-s);color:var(--acc);font-weight:600}
+
+.sec{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px;color:var(--muted);font-size:12.5px;font-weight:650;text-transform:uppercase;letter-spacing:.6px}
+.sec button{color:var(--acc);font-size:12.5px;font-weight:650;text-transform:none;letter-spacing:0;display:flex;align-items:center;gap:4px}
+.sec.red{color:var(--danger)}
+.cnt{background:var(--card2);color:var(--muted);border-radius:8px;padding:1px 7px;margin-left:6px;font-size:11.5px}
+
+.task{display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:14px;padding:12px;margin-bottom:8px;transition:opacity .25s,transform .25s}
+.task .chk{width:24px;height:24px;border-radius:50%;border:2px solid var(--pc,var(--muted));flex:none;display:flex;align-items:center;justify-content:center;color:transparent;margin-top:1px;transition:all .2s}
+.task .chk .i{width:14px;height:14px;stroke-width:3}
+.task.done .chk{background:var(--acc);border-color:var(--acc);color:#fff}
+.task.done .tt{text-decoration:line-through;color:var(--muted)}
+.task.pop .chk{animation:pop .3s}
+.task.fade{opacity:.35;transform:scale(.98)}
+@keyframes pop{50%{transform:scale(1.3)}}
+.tb{flex:1;min-width:0}
+.tt{font-size:15px;word-wrap:break-word}
+.meta{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:5px;color:var(--muted);font-size:12px}
+.meta .m{display:flex;align-items:center;gap:4px}
+.meta .m .i{width:13px;height:13px}
+.meta .late{color:var(--danger)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+
+.empty{text-align:center;color:var(--muted);padding:40px 20px}
+.empty .big{width:64px;height:64px;border-radius:20px;background:var(--acc-s);color:var(--acc);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.empty .big .i{width:30px;height:30px}
+.empty b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+
+.tl-row{display:flex;gap:10px;min-height:46px;border-top:1px dashed var(--line)}
+.tl-h{width:44px;flex:none;color:var(--muted);font-size:12px;padding-top:6px}
+.tl-c{flex:1;padding:6px 0 0}
+.tl-c .task{margin-bottom:6px}
+.tl-row.now .tl-h{color:var(--acc);font-weight:700}
+.tl-row.now{border-top:2px solid var(--acc)}
+.tl-add{width:100%;height:34px;border-radius:10px}
+.tl-add:active{background:var(--card)}
+
+.cal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 0 12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:var(--card);border-radius:var(--r);padding:10px}
+.cal .wd{text-align:center;color:var(--muted);font-size:11.5px;font-weight:600;padding:4px 0}
+.cal .d{aspect-ratio:1/1.05;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;position:relative}
+.cal .d.o{color:var(--muted);opacity:.45}
+.cal .d.t{color:var(--acc);font-weight:800}
+.cal .d.s{background:var(--acc);color:#fff}
+.cal .d .ds{display:flex;gap:2px;height:5px}
+.cal .d .ds i{width:5px;height:5px;border-radius:50%;background:var(--acc)}
+.cal .d.s .ds i{background:#fff!important}
+.cal .d.full::after{content:"";position:absolute;inset:3px;border-radius:9px;border:1.5px solid var(--ok);opacity:.7}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px 2px}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:11px;background:var(--card2);font-size:13.5px;white-space:nowrap;font-weight:500;flex:none}
+.chip.on{background:var(--acc);color:#fff}
+.chip .i{width:15px;height:15px}
+
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:13px;padding:0 12px;margin-bottom:10px;color:var(--muted)}
+.search input{flex:1;border:0;outline:0;background:none;padding:12px 0;color:var(--text)}
+.ngrid{columns:2;column-gap:10px;margin-top:12px}
+.ncard{break-inside:avoid;background:var(--card);border-radius:14px;padding:12px;margin-bottom:10px;border:1.5px solid transparent;display:block;position:relative}
+.ncard .nt{font-weight:650;margin-bottom:5px;word-wrap:break-word;padding-right:16px}
+.ncard .nb{color:var(--muted);font-size:13.5px;white-space:pre-wrap;word-wrap:break-word;display:-webkit-box;-webkit-line-clamp:9;-webkit-box-orient:vertical;overflow:hidden}
+.ncard .nl{font-size:13.5px;color:var(--muted)}
+.ncard .nl div{display:flex;gap:6px;align-items:center;margin:2px 0}
+.ncard .nl .d{text-decoration:line-through;opacity:.7}
+.ncard .nl .i{width:13px;height:13px}
+.ncard .nf{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;font-size:11.5px;color:var(--muted)}
+.ncard .nf span{display:flex;align-items:center;gap:3px;background:var(--card2);padding:2px 7px;border-radius:7px}
+.ncard .pin{position:absolute;top:10px;right:9px;color:var(--acc)}
+.ncard .pin .i{width:14px;height:14px}
+
+.hcard{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.hrow{display:flex;align-items:center;gap:12px}
+.hn{flex:1;min-width:0}
+.hn b{font-size:16px;font-weight:650;display:block}
+.hbig{width:46px;height:46px;border-radius:15px;border:2px solid var(--hc);color:var(--hc);display:flex;align-items:center;justify-content:center;flex:none;transition:all .2s}
+.hbig.on{background:var(--hc);color:#fff}
+.hbig .i{width:22px;height:22px;stroke-width:2.6}
+.hweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.hweek button{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.hweek .c{width:30px;height:30px;border-radius:10px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:transparent}
+.hweek .c .i{width:14px;height:14px;stroke-width:3}
+.hweek .on .c{background:var(--hc);color:#fff}
+.hweek .na .c{opacity:.35}
+.hweek .td{color:var(--text);font-weight:700}
+.streak{display:inline-flex;align-items:center;gap:3px;color:var(--warn);font-weight:650}
+.streak .i{width:14px;height:14px}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.heat i{aspect-ratio:1;border-radius:5px;background:var(--card2)}
+.heat i.on{background:var(--hc)}
+.heat i.na{opacity:.3}
+
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:4px}
+.mi{background:var(--card);border-radius:var(--r);padding:16px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:110px}
+.mi .ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--acc-s);color:var(--acc)}
+.mi b{font-size:15px}
+.mi span{color:var(--muted);font-size:12.5px;margin-top:-6px}
+.sub-head{display:flex;align-items:center;gap:10px;padding:16px 0 14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .rl{flex:1;min-width:0}
+.row .rl small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.seg{display:flex;background:var(--card2);border-radius:11px;padding:3px;gap:2px}
+.seg button{padding:7px 11px;border-radius:9px;font-size:13px;color:var(--muted);font-weight:550}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+body.dark .seg button.on{background:#323846}
+.sw{width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;transition:background .2s;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sw.on{background:var(--acc)}
+.sw.on::after{transform:translateX(18px)}
+.sel{background:var(--card2);border:0;border-radius:10px;padding:8px 10px;outline:0;max-width:170px}
+.colors{display:flex;flex-wrap:wrap;gap:10px}
+.colors button{width:32px;height:32px;border-radius:50%;border:3px solid transparent;display:flex;align-items:center;justify-content:center;color:#fff}
+.colors button.on{border-color:var(--text)}
+.colors button .i{width:16px;height:16px;stroke-width:3}
+.st{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600}
+.st.ok{color:var(--ok)}.st.bad{color:var(--danger)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:13px;background:var(--acc);color:#fff;font-weight:650;font-size:14.5px}
+.btn.ghost{background:var(--card2);color:var(--text)}
+.btn.danger{background:var(--danger)}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+.btn.w{width:100%}
+.btns{display:flex;gap:10px;margin-top:16px}
+.btns .btn{flex:1}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border-radius:var(--r);padding:14px}
+.stat b{font-size:24px;font-weight:750;display:block}
+.stat span{color:var(--muted);font-size:12.5px}
+.chart text{fill:var(--muted);font-size:10px}
+.bar-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13.5px}
+.bar-row .bn{width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .bt{flex:1;height:8px;background:var(--card2);border-radius:4px;overflow:hidden}
+.bar-row .bt i{display:block;height:100%;border-radius:4px}
+.bar-row .bv{width:28px;text-align:right;color:var(--muted)}
+
+.fz{display:flex;flex-direction:column;align-items:center}
+.fz-ring{position:relative;margin:22px 0 18px}
+.fz-ring .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.fz-ring .tm{font-size:46px;font-weight:300;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.fz-ring .md{color:var(--muted);font-size:13px;margin-top:2px}
+.fz-btns{display:flex;align-items:center;gap:22px;margin-bottom:20px}
+.fz-main{width:76px;height:76px;border-radius:26px;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px var(--acc-m)}
+.fz-main .i{width:32px;height:32px}
+.step{display:flex;align-items:center;gap:10px}
+.step b{min-width:32px;text-align:center;font-size:16px}
+.step button{width:34px;height:34px;border-radius:10px;background:var(--card2);font-size:18px;font-weight:600}
+
+/* sheets */
+.layer{position:fixed;inset:0;z-index:50}
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;transition:opacity .25s}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow-y:auto;background:var(--card);border-radius:24px 24px 0 0;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.85,.25,1);padding:6px 16px calc(26px + var(--sab));box-shadow:var(--shadow)}
+.sheet.full{top:0;max-height:none;border-radius:0;background:var(--bg);padding-top:calc(6px + var(--sat))}
+#sat{position:fixed;top:0;left:0;right:0;height:var(--sat);background:var(--bg);z-index:40}
+body.light #sat{background:var(--acc)}
+body.web .and-only{display:none!important}
+.install{display:flex;gap:12px;align-items:flex-start;background:var(--acc-s);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;font-size:13.5px}
+.install .i{color:var(--acc);margin-top:1px}
+.install b{display:block;margin-bottom:2px}
+.install .x{margin-left:auto;color:var(--muted);padding:2px}
+.layer.open .scrim{opacity:1}
+.layer.open .sheet{transform:none}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 10px}
+.sheet.full .grab{display:none}
+.lbl{color:var(--muted);font-size:12.5px;font-weight:650;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.lbl .i{width:14px;height:14px}
+.inp{width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:12px;padding:11px 12px;outline:0}
+.inp:focus{border-color:var(--acc)}
+textarea.inp{resize:none;min-height:70px}
+.e-title{width:100%;background:none;border:0;outline:0;font-size:20px;font-weight:650;padding:6px 0}
+.e-title::placeholder,.inp::placeholder{color:var(--muted);font-weight:400}
+.e-top{display:flex;align-items:center;gap:8px}
+.e-row{display:flex;gap:8px;align-items:center}
+.e-row .inp{flex:1}
+.sub-i{display:flex;align-items:center;gap:10px;padding:4px 0}
+.sub-i .chk{width:22px;height:22px;border-radius:7px;border:2px solid var(--muted);display:flex;align-items:center;justify-content:center;color:transparent;flex:none}
+.sub-i .chk .i{width:13px;height:13px;stroke-width:3}
+.sub-i.d .chk{background:var(--acc);border-color:var(--acc);color:#fff}
+.sub-i.d input{text-decoration:line-through;color:var(--muted)}
+.sub-i input{flex:1;background:none;border:0;outline:0;padding:7px 0;min-width:0}
+.sub-i .x{color:var(--muted);padding:4px}
+.e-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+.e-acts button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:12px;background:var(--card2);font-size:11.5px;color:var(--muted)}
+.e-acts button.del{color:var(--danger)}
+.hint{font-size:12.5px;color:var(--warn);margin-top:6px;display:flex;gap:6px;align-items:center}
+.hint .i{width:14px;height:14px}
+
+.ned{display:flex;flex-direction:column;min-height:100%}
+.ned-top{display:flex;align-items:center;gap:4px;padding:8px 0}
+.sp{flex:1}
+.ned-title{background:none;border:0;outline:0;font-size:22px;font-weight:700;padding:10px 0 6px;width:100%}
+.ned-body{background:none;border:0;outline:0;width:100%;min-height:45vh;resize:none;font-size:16px;line-height:1.5;padding:4px 0}
+.ned-tags{background:none;border:0;border-top:1px solid var(--line);outline:0;padding:12px 0;width:100%;color:var(--muted);font-size:14px;margin-top:10px}
+.ned-foot{color:var(--muted);font-size:12px;padding:8px 0 20px}
+.ned-rem{display:flex;align-items:center;gap:8px;background:var(--acc-s);color:var(--acc);border-radius:12px;padding:6px 6px 6px 12px;margin:6px 0}
+.ned-rem input{flex:1;background:none;border:0;outline:0;color:var(--acc);font-weight:600;min-width:0}
+.cf-t{font-size:16px;font-weight:600;padding:10px 0 4px;text-align:center}
+.cf-s{color:var(--muted);text-align:center;font-size:14px}
+.list-act button{display:flex;align-items:center;gap:14px;width:100%;padding:14px 4px;font-size:15px;border-bottom:1px solid var(--line)}
+.list-act button:last-child{border:0}
+.list-act .red{color:var(--danger)}
+
+#toast{position:fixed;left:16px;right:16px;bottom:calc(78px + var(--sab));background:#262a33;color:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;transform:translateY(20px);opacity:0;pointer-events:none;transition:all .25s;z-index:90;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+#toast.on{transform:none;opacity:1;pointer-events:auto}
+#toast button{color:#b9a8ff;font-weight:700}
+.mt{margin-top:12px}
+.muted{color:var(--muted)}
+.help li{margin:6px 0 6px 18px;line-height:1.45}
+</style>
+</head>
+<body class="dark">
+<div id="sat"></div>
+<main id="view"></main>
+<button id="fab" aria-label="Добавить"></button>
+<nav id="nav"></nav>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const A = window.Android || null;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ---------- иконки ---------- */
+const P = {
+  plus:'M12 5v14M5 12h14', search:'M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14zM20 20l-3.5-3.5', check:'M5 12l5 5L20 7',
+  cal:'M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM4 10h16M8 3v4M16 3v4',
+  sun:'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+  note:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6', target:'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10zM12 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2z',
+  grid:'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z', clock:'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7v5l3 2',
+  bell:'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
+  repeat:'M17 2l4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3',
+  flag:'M4 22V4M4 4h13l-2 4 2 4H4', tag:'M3 12V3h9l9 9-9 9zM7.5 7.5h.01', trash:'M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5',
+  pin:'M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z', archive:'M3 4h18v4H3zM5 8v12h14V8M10 12h4', x:'M18 6L6 18M6 6l12 12',
+  chevL:'M15 18l-6-6 6-6', chevR:'M9 18l6-6-6-6', chevD:'M6 9l6 6 6-6', chevU:'M6 15l6-6 6 6',
+  timer:'M10 2h4M12 14l3-3M12 6a8 8 0 1 0 0 16a8 8 0 1 0 0-16z', chart:'M3 3v18h18M7 16v-4M12 16V8M17 16v-7',
+  gear:'M12 15a3 3 0 1 0 0-6a3 3 0 1 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
+  share:'M4 12v8h16v-8M12 3v13M7 8l5-5 5 5', copy:'M9 9h11v11H9zM5 15H4V4h11v1', list:'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+  checksq:'M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11', inbox:'M22 12h-6l-2 3h-4l-2-3H2M5.5 5h13L22 12v7H2v-7z',
+  edit:'M4 20h4L19 9l-4-4L4 16zM14 6l4 4', play:'M8 5v14l11-7z', pause:'M7 5h3v14H7zM14 5h3v14h-3z', reset:'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5',
+  skip:'M5 5l10 7-10 7zM19 5v14', download:'M12 3v12M7 10l5 5 5-5M4 21h16', upload:'M12 15V3M7 8l5-5 5 5M4 21h16',
+  drop:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z', dots:'M12 5h.01M12 12h.01M12 19h.01', star:'M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z',
+  arrowR:'M5 12h14M13 6l6 6-6 6', phone:'M7 2h10a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM11 18h2',
+  battery:'M3 7h15v10H3zM21 10v4M7 10v4M11 10v4', moon:'M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z',
+  flame:'M12 22c-4 0-7-3-7-7 0-3 2-5 3-7 0 2 1 3 2 3 0-4 2-7 5-9 0 3 1 5 3 7 1 1 2 3 2 6 0 4-3 7-8 7z',
+  layers:'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5', zap:'M13 2L4 14h7l-1 8 9-12h-7z', sunrise:'M12 3v3M5 9l2 2M19 9l-2 2M3 17h18M7 17a5 5 0 0 1 10 0M8 21h8',
+  undo:'M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3', square:'M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z', move:'M5 12h14M12 5l7 7-7 7'
+};
+const ic = (n, c = '') => `<svg class="i ${c}" viewBox="0 0 24 24"><path d="${P[n] || ''}"/></svg>`;
+
+/* ---------- даты ---------- */
+const pad = n => String(n).padStart(2, '0');
+const key = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const pk = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const today = () => key(new Date());
+const addDays = (k, n) => { const d = pk(k); d.setDate(d.getDate() + n); return key(d); };
+const isoW = d => (d.getDay() + 6) % 7 + 1;
+const nowHM = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const MG = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const MN = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const WD = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const WDL = ['понедельник','вторник','среда','четверг','пятница','суббота','воскресенье'];
+function human(k) {
+  if (!k) return 'Без даты';
+  const T = today();
+  if (k === T) return 'Сегодня';
+  if (k === addDays(T, 1)) return 'Завтра';
+  if (k === addDays(T, -1)) return 'Вчера';
+  const d = pk(k);
+  return d.getDate() + ' ' + MG[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+}
+const longDate = k => { const d = pk(k); const w = WDL[isoW(d) - 1]; return w[0].toUpperCase() + w.slice(1) + ', ' + d.getDate() + ' ' + MG[d.getMonth()]; };
+function fmtStamp(ms) { const d = new Date(ms); return human(key(d)) + ', ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function plural(n, a, b, c) { const m10 = n % 10, m100 = n % 100; if (m10 === 1 && m100 !== 11) return a; if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return b; return c; }
+function rgba(hex, a) { const h = (hex || '#7c5cff').replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
+
+/* ---------- данные ---------- */
+const ACCENTS = ['#7c5cff','#3b82f6','#06b6d4','#14b8a6','#22c55e','#eab308','#f97316','#ef4444','#ec4899'];
+const NCOL = ['','#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#7c5cff','#ec4899','#a16207'];
+const PRIO = [{n:'Нет',c:'var(--muted)'},{n:'Низкий',c:'#3b82f6'},{n:'Средний',c:'#f97316'},{n:'Высокий',c:'#ef4444'}];
+const REMINDS = [[-1,'Без напоминания'],[0,'В момент начала'],[5,'За 5 минут'],[10,'За 10 минут'],[15,'За 15 минут'],[30,'За 30 минут'],[60,'За 1 час'],[120,'За 2 часа'],[1440,'За 1 день']];
+const REPEATS = [['none','Не повторять'],['daily','Каждый день'],['weekdays','По будням'],['weekly','Каждую неделю'],['monthly','Каждый месяц'],['yearly','Каждый год'],['custom','По дням недели']];
+const DEF = {theme:'dark', accent:'#7c5cff', weekMon:true, defRemind:0, snooze:10, wStyle:'dark', wDone:true, focusWork:25, focusBreak:5, view:'list', askedNotif:false};
+
+function newTask(p = {}) {
+  return Object.assign({id:uid(), title:'', notes:'', date:today(), time:'', prio:0, cat:'', subs:[], repeat:{type:'none', days:[], until:''}, remind:-1, done:false, doneAt:'', doneDates:[], created:Date.now()}, p);
+}
+function newNote(p = {}) {
+  return Object.assign({id:uid(), title:'', body:'', color:'', pinned:false, archived:false, trashed:false, list:false, items:[], tags:[], remind:'', created:Date.now(), updated:Date.now()}, p);
+}
+function seed() {
+  const T = today();
+  const cats = [{id:'c1',name:'Работа',color:'#3b82f6'},{id:'c2',name:'Личное',color:'#22c55e'},{id:'c3',name:'Учёба',color:'#a855f7'},{id:'c4',name:'Здоровье',color:'#ef4444'},{id:'c5',name:'Покупки',color:'#f97316'}];
+  return {
+    v:1, cats,
+    tasks:[
+      newTask({title:'Нажмите на кружок слева, чтобы отметить задачу', date:T, prio:1}),
+      newTask({title:'Нажмите на задачу, чтобы открыть подробности', date:T, notes:'Здесь можно указать время, напоминание, повтор, приоритет, категорию и подзадачи.', subs:[{t:'Указать время',d:false},{t:'Включить напоминание',d:false}]}),
+      A ? newTask({title:'Добавить виджет на рабочий стол', date:T, cat:'c2', notes:'Удерживайте палец на пустом месте рабочего стола → Виджеты → «Мой день».'})
+        : newTask({title:'Установить приложение на экран «Домой»', date:T, cat:'c2', notes:'В Safari нажмите «Поделиться» (квадрат со стрелкой) → «На экран Домой».'})
+    ],
+    notes:[newNote({title:'Быстрый ввод задач', body:'В строке «Добавить задачу» можно писать сразу с датой и временем:\n\nзавтра 15:00 позвонить маме\nв пятницу в 10 отчёт #работа !!\nкаждый день 8:00 зарядка\n25.12 купить подарки #покупки\n\n! — низкий, !! — средний, !!! — высокий приоритет\n#название — категория', pinned:true, color:'#7c5cff'})],
+    habits:[{id:uid(), name:'Выпить 8 стаканов воды', color:'#06b6d4', days:[1,2,3,4,5,6,7], done:[], remind:'', created:Date.now()},
+            {id:uid(), name:'Зарядка', color:'#22c55e', days:[1,2,3,4,5], done:[], remind:'', created:Date.now()}],
+    focusLog:{}, settings:Object.assign({}, DEF)
+  };
+}
+function normalize(d) {
+  d = d && typeof d === 'object' ? d : {};
+  d.v = 1;
+  ['tasks','notes','cats','habits'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
+  d.focusLog = d.focusLog && typeof d.focusLog === 'object' ? d.focusLog : {};
+  d.settings = Object.assign({}, DEF, d.settings || {});
+  d.focus = Object.assign({mode:'work', running:false, endAt:0, left:0, total:0, taskId:''}, d.focus || {});
+  d.tasks = d.tasks.filter(t => t && typeof t === 'object');
+  d.tasks.forEach(t => {
+    t.id = String(t.id || uid()); t.title = String(t.title || ''); t.notes = String(t.notes || ''); t.date = t.date || ''; t.time = t.time || '';
+    t.prio = Math.max(0, Math.min(3, +t.prio || 0)); t.cat = t.cat || '';
+    t.subs = Array.isArray(t.subs) ? t.subs.filter(Boolean).map(s => ({t:String(s.t || ''), d:!!s.d})) : [];
+    const r = t.repeat && t.repeat.type ? t.repeat : {type:'none'};
+    t.repeat = {type:r.type, days:Array.isArray(r.days) ? r.days.map(Number) : [], until:r.until || ''};
+    t.remind = (t.remind === undefined || t.remind === null || t.remind === '') ? -1 : +t.remind;
+    t.done = !!t.done; t.doneAt = t.doneAt || ''; t.doneDates = Array.isArray(t.doneDates) ? t.doneDates : []; t.created = t.created || Date.now();
+  });
+  d.notes = d.notes.filter(n => n && typeof n === 'object').map(n => newNote(Object.assign({}, n, {
+    title:String(n.title || ''), body:String(n.body || ''), color:n.color || '', remind:n.remind || '',
+    items:Array.isArray(n.items) ? n.items.filter(Boolean).map(i => ({t:String(i.t || ''), d:!!i.d})) : [],
+    tags:Array.isArray(n.tags) ? n.tags.map(String).filter(Boolean) : [], pinned:!!n.pinned, archived:!!n.archived, trashed:!!n.trashed, list:!!n.list})));
+  d.cats = d.cats.filter(c => c && c.id).map(c => ({id:String(c.id), name:String(c.name || 'Категория'), color:c.color || '#7c5cff'}));
+  d.habits = d.habits.filter(h => h && typeof h === 'object').map(h => ({id:String(h.id || uid()), name:String(h.name || 'Привычка'), color:h.color || '#7c5cff',
+    days:Array.isArray(h.days) && h.days.length ? h.days.map(Number) : [1,2,3,4,5,6,7], done:Array.isArray(h.done) ? h.done : [], remind:h.remind || '', created:h.created || Date.now()}));
+  return d;
+}
+function load() {
+  let raw = '';
+  try { raw = A ? A.load() : (localStorage.getItem('myday') || ''); } catch (e) {}
+  let d = null;
+  try { d = raw ? JSON.parse(raw) : null; } catch (e) {}
+  const fresh = !d;
+  d = normalize(d || seed());
+  if (fresh) saveData(d);
+  return d;
+}
+function saveData(d) { const s = JSON.stringify(d); try { if (A) A.save(s); else localStorage.setItem('myday', s); } catch (e) {} }
+let D = load();
+let saveT = 0;
+function save() { clearTimeout(saveT); saveT = setTimeout(flush, 150); }
+function flush() { if (!saveT) return; clearTimeout(saveT); saveT = 0; saveData(D); }
+window.flush = flush;
+
+/* ---------- логика задач ---------- */
+const isRep = t => t.repeat && t.repeat.type !== 'none';
+function occurs(t, k) {
+  if (!t.date) return false;
+  const r = t.repeat;
+  if (!isRep(t)) return t.date === k;
+  if (k < t.date) return false;
+  if (r.until && k > r.until) return false;
+  const d = pk(k), s = pk(t.date), w = isoW(d);
+  switch (r.type) {
+    case 'daily': return true;
+    case 'weekdays': return w <= 5;
+    case 'weekly': return w === isoW(s);
+    case 'monthly': return d.getDate() === s.getDate();
+    case 'yearly': return d.getDate() === s.getDate() && d.getMonth() === s.getMonth();
+    case 'custom': return r.days.includes(w);
+  }
+  return false;
+}
+const isDone = (t, k) => isRep(t) ? t.doneDates.includes(k) : t.done;
+function setDone(t, k, v) {
+  if (isRep(t)) { const i = t.doneDates.indexOf(k); if (v && i < 0) t.doneDates.push(k); if (!v && i >= 0) t.doneDates.splice(i, 1); }
+  else { t.done = v; t.doneAt = v ? today() : ''; }
+}
+const byId = id => D.tasks.find(t => t.id === id);
+const catOf = id => D.cats.find(c => c.id === id);
+const tasksFor = k => D.tasks.filter(t => occurs(t, k));
+const overdue = () => { const T = today(); return D.tasks.filter(t => !isRep(t) && t.date && t.date < T && !t.done); };
+function sortT(arr, k) {
+  return arr.slice().sort((a, b) => {
+    const da = isDone(a, k || a.date), db = isDone(b, k || b.date);
+    if (da !== db) return da ? 1 : -1;
+    const ta = a.time || '99', tb = b.time || '99';
+    if (ta !== tb) return ta < tb ? -1 : 1;
+    if (a.prio !== b.prio) return b.prio - a.prio;
+    return a.created - b.created;
+  });
+}
+function completionsOn(k) {
+  let n = 0;
+  D.tasks.forEach(t => { if (isRep(t)) { if (t.doneDates.includes(k)) n++; } else if (t.done && t.doneAt === k) n++; });
+  return n;
+}
+const habitSched = (h, k) => h.days.includes(isoW(pk(k)));
+function habitStreak(h) {
+  let k = today(), n = 0;
+  const start = key(new Date(h.created || Date.now()));
+  if (habitSched(h, k) && !h.done.includes(k)) k = addDays(k, -1);
+  for (let i = 0; i < 1500; i++) {
+    if (k < start && !h.done.includes(k)) break;
+    if (habitSched(h, k)) { if (h.done.includes(k)) n++; else break; }
+    k = addDays(k, -1);
+  }
+  return n;
+}
+function habitBest(h) {
+  const ds = h.done.slice().sort(); if (!ds.length) return 0;
+  let best = 0, cur = 0, k = ds[0];
+  const end = today();
+  for (let i = 0; i < 2000 && k <= end; i++) {
+    if (habitSched(h, k)) { if (h.done.includes(k)) { cur++; best = Math.max(best, cur); } else if (k !== end) cur = 0; }
+    k = addDays(k, 1);
+  }
+  return best;
+}
+
+/* ---------- быстрый ввод ---------- */
+function parseQuick(src, base) {
+  let s = ' ' + src.trim() + ' ';
+  const r = {date:base, time:'', prio:0, cat:'', newCat:'', rep:'none'};
+  const take = (re, fn) => { s = s.replace(re, (...m) => { fn(m); return ' '; }); };
+  const T = today();
+  take(/\s(!{1,3})(?=\s)/, m => r.prio = m[1].length);
+  take(/\s#([^\s#]+)(?=\s)/, m => { const n = m[1].toLowerCase(); const c = D.cats.find(c => c.name.toLowerCase().startsWith(n)); if (c) r.cat = c.id; else r.newCat = m[1]; });
+  take(/\s(каждый день|ежедневно)(?=\s)/i, () => r.rep = 'daily');
+  take(/\s(по будням)(?=\s)/i, () => r.rep = 'weekdays');
+  take(/\s(каждую неделю|еженедельно)(?=\s)/i, () => r.rep = 'weekly');
+  take(/\s(каждый месяц|ежемесячно)(?=\s)/i, () => r.rep = 'monthly');
+  take(/\s(послезавтра)(?=\s)/i, () => r.date = addDays(T, 2));
+  take(/\s(завтра)(?=\s)/i, () => r.date = addDays(T, 1));
+  take(/\s(сегодня)(?=\s)/i, () => r.date = T);
+  take(/\sчерез\s(\d{1,3})\s(дн[яейь]|день)(?=\s)/i, m => r.date = addDays(T, +m[1]));
+  take(/\sчерез\sнеделю(?=\s)/i, () => r.date = addDays(T, 7));
+  const wds = ['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
+  take(/\s(?:в|во)\s(понедельник|вторник|среду|четверг|пятницу|субботу|воскресенье)(?=\s)/i, m => {
+    const w = wds.indexOf(m[1].toLowerCase()) + 1; const cur = isoW(new Date()); let add = (w - cur + 7) % 7; if (add === 0) add = 7; r.date = addDays(T, add);
+  });
+  take(/\s(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?(?=\s)/, m => {
+    const dd = +m[1], mm = +m[2]; if (dd < 1 || dd > 31 || mm < 1 || mm > 12) return;
+    let y = m[3] ? +m[3] : new Date().getFullYear(); if (y < 100) y += 2000;
+    let k = y + '-' + pad(mm) + '-' + pad(dd); if (!m[3] && k < T) k = (y + 1) + '-' + pad(mm) + '-' + pad(dd); r.date = k;
+  });
+  take(/\s(?:в\s)?([01]?\d|2[0-3]):([0-5]\d)(?=\s)/, m => r.time = pad(+m[1]) + ':' + m[2]);
+  take(/\sв\s([01]?\d|2[0-3])(?:\s?ч(?:ас(?:а|ов)?)?)?(?=\s)/i, m => r.time = pad(+m[1]) + ':00');
+  if (r.rep !== 'none' && !r.date) r.date = T;
+  r.title = s.replace(/\s+/g, ' ').trim();
+  return r;
+}
+function quickAdd(text, base) {
+  const p = parseQuick(text, base);
+  if (!p.title) return false;
+  if (p.newCat) { const c = {id:uid(), name:p.newCat, color:ACCENTS[D.cats.length % ACCENTS.length]}; D.cats.push(c); p.cat = c.id; }
+  const t = newTask({title:p.title, date:p.date, time:p.time, prio:p.prio, cat:p.cat, repeat:{type:p.rep, days:[], until:''}, remind:p.time ? D.settings.defRemind : -1});
+  D.tasks.push(t); save(); return t;
+}
+function qaPreview(text, base) {
+  if (!text.trim()) return '';
+  const p = parseQuick(text, base), out = [];
+  if (p.date !== base) out.push(`<span class="tag">${ic('cal','s')}${human(p.date)}</span>`);
+  if (p.time) out.push(`<span class="tag">${ic('clock','s')}${p.time}</span>`);
+  if (p.rep !== 'none') out.push(`<span class="tag">${ic('repeat','s')}${REPEATS.find(x => x[0] === p.rep)[1]}</span>`);
+  if (p.prio) out.push(`<span class="tag" style="background:${rgba(['','#3b82f6','#f97316','#ef4444'][p.prio], .16)};color:${['','#3b82f6','#f97316','#ef4444'][p.prio]}">${ic('flag','s')}${PRIO[p.prio].n}</span>`);
+  if (p.cat) { const c = catOf(p.cat); out.push(`<span class="tag" style="background:${rgba(c.color, .16)};color:${c.color}">${ic('tag','s')}${esc(c.name)}</span>`); }
+  if (p.newCat) out.push(`<span class="tag">${ic('tag','s')}Новая: ${esc(p.newCat)}</span>`);
+  return out.join('');
+}
+
+/* ---------- состояние экрана ---------- */
+const S = {tab:'today', more:'', calMonth:'', calSel:today(), nf:'all', nq:'', col:{done:true, inbox:false}};
+let sysIsDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : true;
+try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => { if (!A) { sysIsDark = e.matches; applyTheme(); } }); } catch (e) {}
+let lastBars = '';
+function applyTheme() {
+  const s = D.settings;
+  const dark = s.theme === 'dark' || (s.theme === 'auto' && sysIsDark);
+  document.body.classList.toggle('dark', dark); document.body.classList.toggle('light', !dark); document.body.classList.toggle('web', !A);
+  const tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.setAttribute('content', dark ? '#0f1115' : '#f3f4f8');
+  const r = document.documentElement.style;
+  r.setProperty('--acc', s.accent); r.setProperty('--acc-s', rgba(s.accent, dark ? .18 : .13)); r.setProperty('--acc-m', rgba(s.accent, .35));
+  const bg = dark ? '#0f1115' : '#f3f4f8';
+  if (A && lastBars !== bg) { lastBars = bg; try { A.setBars(bg, !dark); } catch (e) {} }
+}
+window.sysDark = v => { sysIsDark = !!v; applyTheme(); };
+
+/* ---------- общие элементы ---------- */
+function ring(p, size, stroke, id) {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r, h = size / 2;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${h}" cy="${h}" r="${r}" stroke="var(--card2)" stroke-width="${stroke}" fill="none"/><circle ${id ? `id="${id}"` : ''} cx="${h}" cy="${h}" r="${r}" stroke="var(--acc)" stroke-width="${stroke}" fill="none" stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${(c * (1 - Math.max(0, Math.min(1, p)))).toFixed(2)}" transform="rotate(-90 ${h} ${h})" style="transition:stroke-dashoffset .6s"/></svg>`;
+}
+function taskRow(t, k, opt = {}) {
+  const dk = k || t.date;
+  const done = dk ? isDone(t, dk) : t.done;
+  const cat = catOf(t.cat), sd = t.subs.filter(s => s.d).length, meta = [];
+  if (opt.showDate && t.date) meta.push(`<span class="m ${!done && t.date < today() ? 'late' : ''}">${ic('cal')}${human(t.date)}</span>`);
+  if (t.time) meta.push(`<span class="m ${!done && dk === today() && t.time < nowHM() ? 'late' : ''}">${ic('clock')}${t.time}</span>`);
+  if (cat) meta.push(`<span class="m"><i class="dot" style="background:${cat.color}"></i>${esc(cat.name)}</span>`);
+  if (t.subs.length) meta.push(`<span class="m">${ic('checksq')}${sd}/${t.subs.length}</span>`);
+  if (isRep(t)) meta.push(`<span class="m">${ic('repeat')}</span>`);
+  if (t.remind >= 0 && t.time) meta.push(`<span class="m">${ic('bell')}</span>`);
+  if (t.notes) meta.push(`<span class="m">${ic('note')}</span>`);
+  return `<div class="task ${done ? 'done' : ''}" style="--pc:${PRIO[t.prio].c}"><button class="chk" data-a="toggle" data-id="${t.id}" data-k="${dk || ''}">${ic('check')}</button><div class="tb" data-a="edit" data-id="${t.id}"><div class="tt">${esc(t.title)}</div>${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}</div></div>`;
+}
+const qaForm = (k, ph) => `<form class="qa" data-k="${k}"><input id="qa" placeholder="${ph || 'Добавить задачу…'}" autocomplete="off" enterkeyhint="done"><button type="submit">${ic('plus')}</button></form><div class="qa-prev" id="qa-prev"></div>`;
+const emptyBox = (icon, title, text) => `<div class="empty"><div class="big">${ic(icon)}</div><b>${title}</b>${text}</div>`;
+function greet() { const h = new Date().getHours(); return h < 5 ? 'Доброй ночи' : h < 12 ? 'Доброе утро' : h < 18 ? 'Добрый день' : 'Добрый вечер'; }
+
+/* ---------- экран «Сегодня» ---------- */
+function vToday() {
+  const T = today(), list = sortT(tasksFor(T), T), od = sortT(overdue());
+  const inbox = D.tasks.filter(t => !t.date && !t.done);
+  const done = list.filter(t => isDone(t, T)), open = list.filter(t => !isDone(t, T));
+  const total = list.length, p = total ? done.length / total : 0;
+  const hs = D.habits.filter(h => habitSched(h, T)), hd = hs.filter(h => h.done.includes(T)).length;
+  const fm = D.focusLog[T] || 0;
+  const tl = D.settings.view === 'timeline';
+  let h = `<div class="hero"><div><div class="h1">${greet()}</div><div class="sub">${longDate(T)}</div></div><div class="hbtns"><button class="ib" data-a="search">${ic('search')}</button><button class="ib ${tl ? 'on' : ''}" data-a="view">${ic(tl ? 'list' : 'clock')}</button></div></div>`;
+  if (!A && !isStandalone() && !D.settings.hideInstall) h += `<div class="install">${ic('download')}<div><b>Установите на экран «Домой»</b>В Safari нажмите «Поделиться» (квадрат со стрелкой вверх) → «На экран Домой». Приложение откроется на весь экран и будет работать без интернета.</div><button class="x" data-a="set" data-k="hideInstall" data-v="true">${ic('x','s')}</button></div>`;
+  h += `<div class="card prog"><div class="ringw">${ring(p, 64, 7)}<div class="rl">${Math.round(p * 100)}%</div></div><div><div class="pt">${total ? (open.length ? `Осталось ${open.length} ${plural(open.length,'задача','задачи','задач')}` : 'Всё сделано!') : 'План на день пуст'}</div><div class="ps"><span>${ic('check','s')}${done.length}/${total}</span><span>${ic('target','s')}${hd}/${hs.length}</span><span>${ic('timer','s')}${fm} мин</span></div></div></div>`;
+  h += qaForm(T, 'Добавить задачу… (завтра 15:00 #работа)');
+  if (od.length) {
+    h += `<div class="sec red"><span>Просрочено<span class="cnt">${od.length}</span></span><button data-a="odAll">${ic('move','s')}На сегодня</button></div>`;
+    h += od.map(t => taskRow(t, t.date, {showDate:true})).join('');
+  }
+  if (tl) {
+    h += `<div class="sec"><span>План по часам</span></div>` + timeline(list, T);
+  } else {
+    if (open.length) h += `<div class="sec"><span>Задачи<span class="cnt">${open.length}</span></span></div>` + open.map(t => taskRow(t, T)).join('');
+    if (done.length) {
+      h += `<div class="sec"><span>Выполнено<span class="cnt">${done.length}</span></span><button data-a="col" data-c="done">${ic(S.col.done ? 'chevU' : 'chevD', 's')}</button></div>`;
+      if (S.col.done) h += done.map(t => taskRow(t, T)).join('');
+    }
+  }
+  if (inbox.length) {
+    h += `<div class="sec"><span>Входящие · без даты<span class="cnt">${inbox.length}</span></span><button data-a="col" data-c="inbox">${ic(S.col.inbox ? 'chevU' : 'chevD', 's')}</button></div>`;
+    if (S.col.inbox) h += sortT(inbox).map(t => taskRow(t, '')).join('');
+  }
+  if (!total && !od.length && !tl) h += emptyBox('sun', 'Свободный день', 'Добавьте задачу через строку выше<br>или кнопку +');
+  return h;
+}
+function timeline(list, k) {
+  const timed = list.filter(t => t.time), free = list.filter(t => !t.time);
+  const hours = timed.map(t => +t.time.slice(0, 2));
+  const st = Math.min(7, ...hours), en = Math.max(22, ...hours), nowH = new Date().getHours();
+  let h = '';
+  if (free.length) h += free.map(t => taskRow(t, k)).join('');
+  for (let x = st; x <= en; x++) {
+    const ts = timed.filter(t => +t.time.slice(0, 2) === x);
+    h += `<div class="tl-row ${x === nowH && k === today() ? 'now' : ''}"><div class="tl-h">${pad(x)}:00</div><div class="tl-c">${ts.map(t => taskRow(t, k)).join('') || `<button class="tl-add" data-a="addAt" data-k="${k}" data-t="${pad(x)}:00"></button>`}</div></div>`;
+  }
+  return h;
+}
+
+/* ---------- календарь ---------- */
+function vCal() {
+  if (!S.calMonth) S.calMonth = S.calSel.slice(0, 7);
+  const [y, m] = S.calMonth.split('-').map(Number), first = new Date(y, m - 1, 1);
+  const mon = D.settings.weekMon, off = mon ? (first.getDay() + 6) % 7 : first.getDay();
+  const T = today();
+  let h = `<div class="cal-head"><div><div class="h1">${MN[m - 1]}</div><div class="sub">${y}</div></div><div class="hbtns"><button class="ib" data-a="calNav" data-d="-1">${ic('chevL')}</button><button class="ib" data-a="calToday">${ic('cal')}</button><button class="ib" data-a="calNav" data-d="1">${ic('chevR')}</button></div></div>`;
+  const wds = mon ? WD : ['Вс'].concat(WD.slice(0, 6));
+  h += '<div class="cal">' + wds.map(w => `<div class="wd">${w}</div>`).join('');
+  const start = new Date(y, m - 1, 1 - off);
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const k = key(d), ts = tasksFor(k), dn = ts.filter(t => isDone(t, k)).length;
+    const dots = ts.filter(t => !isDone(t, k)).slice(0, 3).map(t => { const c = catOf(t.cat); return `<i style="background:${c ? c.color : 'var(--acc)'}"></i>`; }).join('');
+    const cls = [d.getMonth() !== m - 1 ? 'o' : '', k === T ? 't' : '', k === S.calSel ? 's' : '', ts.length && dn === ts.length && k <= T ? 'full' : ''].join(' ');
+    h += `<button class="d ${cls}" data-a="day" data-k="${k}">${d.getDate()}<span class="ds">${dots}</span></button>`;
+    if (i >= 34 && d.getMonth() !== m - 1 && i % 7 === 6) break;
+  }
+  h += '</div>';
+  const list = sortT(tasksFor(S.calSel), S.calSel);
+  h += `<div class="sec" style="margin-top:20px"><span>${longDate(S.calSel)}<span class="cnt">${list.length}</span></span></div>`;
+  h += qaForm(S.calSel, 'Добавить на этот день…');
+  h += list.map(t => taskRow(t, S.calSel)).join('') || `<div class="empty" style="padding:24px">${S.calSel < T ? 'В этот день задач не было' : 'На этот день ничего не запланировано'}</div>`;
+  return h;
+}
+
+/* ---------- заметки ---------- */
+function noteList() {
+  const q = S.nq.trim().toLowerCase();
+  let n = D.notes.filter(x => {
+    switch (S.nf) {
+      case 'all': return !x.trashed && !x.archived;
+      case 'pinned': return x.pinned && !x.trashed && !x.archived;
+      case 'remind': return x.remind && !x.trashed;
+      case 'archive': return x.archived && !x.trashed;
+      case 'trash': return x.trashed;
+      default: return !x.trashed && x.tags.includes(S.nf.slice(4));
+    }
+  });
+  if (q) n = n.filter(x => (x.title + ' ' + x.body + ' ' + x.items.map(i => i.t).join(' ') + ' ' + x.tags.join(' ')).toLowerCase().includes(q));
+  return n.sort((a, b) => (b.pinned - a.pinned) || (b.updated - a.updated));
+}
+function noteCard(n) {
+  const st = n.color ? `style="background:${rgba(n.color, .16)};border-color:${rgba(n.color, .35)}"` : '';
+  let body = '';
+  if (n.list) {
+    const its = n.items.slice().sort((a, b) => a.d - b.d).slice(0, 6);
+    body = `<div class="nl">${its.map(i => `<div class="${i.d ? 'd' : ''}">${ic(i.d ? 'checksq' : 'square')}${esc(i.t)}</div>`).join('')}${n.items.length > 6 ? `<div>+ ещё ${n.items.length - 6}</div>` : ''}</div>`;
+  } else if (n.body) body = `<div class="nb">${esc(n.body.slice(0, 400))}</div>`;
+  const f = [];
+  if (n.remind) f.push(`<span>${ic('bell','s')}${esc(fmtStamp(new Date(n.remind).getTime()))}</span>`);
+  n.tags.slice(0, 3).forEach(t => f.push(`<span>#${esc(t)}</span>`));
+  return `<div class="ncard" data-a="note" data-id="${n.id}" ${st}>${n.pinned ? `<span class="pin">${ic('pin')}</span>` : ''}${n.title ? `<div class="nt">${esc(n.title)}</div>` : ''}${body}${f.length ? `<div class="nf">${f.join('')}</div>` : ''}</div>`;
+}
+function noteGrid() {
+  const list = noteList();
+  if (!list.length) {
+    const m = {trash:['trash','Корзина пуста',''], archive:['archive','Архив пуст',''], pinned:['pin','Нет закреплённых','Закрепите важные заметки значком булавки'], remind:['bell','Нет напоминаний','Добавьте напоминание к заметке']};
+    const e = S.nq ? ['search','Ничего не найдено','Попробуйте другой запрос'] : (m[S.nf] || ['note','Заметок пока нет','Нажмите +, чтобы создать первую']);
+    return emptyBox(e[0], e[1], e[2]);
+  }
+  return `<div class="ngrid">${list.map(noteCard).join('')}</div>`;
+}
+function vNotes() {
+  const tags = [...new Set(D.notes.filter(n => !n.trashed).flatMap(n => n.tags))].sort();
+  const f = [['all','Все'],['pinned','Закреплённые'],['remind','С напоминанием']].concat(tags.map(t => ['tag:' + t, '#' + t])).concat([['archive','Архив'],['trash','Корзина']]);
+  let h = `<div class="hero"><div><div class="h1">Заметки</div><div class="sub">${D.notes.filter(n => !n.trashed && !n.archived).length} ${plural(D.notes.filter(n => !n.trashed && !n.archived).length,'заметка','заметки','заметок')}</div></div>${S.nf === 'trash' && D.notes.some(n => n.trashed) ? `<button class="btn sm danger" data-a="emptyTrash">${ic('trash','s')}Очистить</button>` : ''}</div>`;
+  h += `<div class="search">${ic('search')}<input id="nq" placeholder="Поиск по заметкам" value="${esc(S.nq)}"></div>`;
+  h += `<div class="chips scroll">${f.map(x => `<button class="chip ${S.nf === x[0] ? 'on' : ''}" data-a="nf" data-f="${esc(x[0])}">${esc(x[1])}</button>`).join('')}</div>`;
+  h += `<div id="ngrid">${noteGrid()}</div>`;
+  return h;
+}
+
+/* ---------- привычки ---------- */
+function vHabits() {
+  const T = today(), hs = D.habits.filter(h => habitSched(h, T)), hd = hs.filter(h => h.done.includes(T)).length;
+  let h = `<div class="hero"><div><div class="h1">Привычки</div><div class="sub">${D.habits.length ? `Сегодня ${hd} из ${hs.length}` : 'Маленькие шаги каждый день'}</div></div></div>`;
+  if (!D.habits.length) return h + emptyBox('target', 'Нет привычек', 'Нажмите +, чтобы добавить первую:<br>вода, зарядка, чтение, прогулка…');
+  D.habits.forEach(x => {
+    const on = x.done.includes(T), sch = habitSched(x, T), st = habitStreak(x);
+    const sched = x.days.length === 7 ? 'Каждый день' : x.days.length === 5 && x.days.every(d => d <= 5) ? 'По будням' : x.days.map(d => WD[d - 1]).join(', ');
+    let w = '';
+    for (let i = 6; i >= 0; i--) {
+      const k = addDays(T, -i), d = pk(k), s = habitSched(x, k), dn = x.done.includes(k);
+      w += `<button class="${dn ? 'on' : ''} ${s ? '' : 'na'}" data-a="habit" data-id="${x.id}" data-k="${k}"><span class="${k === T ? 'td' : ''}">${WD[isoW(d) - 1]}</span><span class="c">${ic('check')}</span></button>`;
+    }
+    h += `<div class="hcard" style="--hc:${x.color}"><div class="hrow"><div class="hn" data-a="habitEdit" data-id="${x.id}"><b>${esc(x.name)}</b><div class="sub">${sched}${x.remind ? ' · ' + x.remind : ''}${st ? ` · <span class="streak">${ic('flame')}${st}</span>` : ''}</div></div>${sch ? `<button class="hbig ${on ? 'on' : ''}" data-a="habit" data-id="${x.id}" data-k="${T}">${ic('check')}</button>` : `<span class="muted" style="font-size:12px">не сегодня</span>`}</div><div class="hweek">${w}</div></div>`;
+  });
+  return h;
+}
+
+/* ---------- «Ещё» ---------- */
+function vMore() {
+  const sub = {focus:vFocus, stats:vStats, settings:vSettings, cats:vCats, widget:vWidget}[S.more];
+  if (sub) return sub();
+  const f = D.focus, fl = f.running ? 'Идёт: ' + fmtLeft(focusLeft()) : 'Помодоро 25/5';
+  const items = [['focus','timer','Фокус',fl],['stats','chart','Статистика','Прогресс и серии'],['cats','tag','Категории',D.cats.length + ' шт.'],].concat(A ? [['widget','phone','Виджет','Как добавить']] : []).concat([['settings','gear','Настройки','Тема, напоминания'],['backup','download','Копия данных','Экспорт и импорт']]);
+  return `<div class="hero"><div><div class="h1">Ещё</div><div class="sub">Инструменты и настройки</div></div><button class="ib" data-a="search">${ic('search')}</button></div><div class="menu">${items.map(x => `<button class="mi" data-a="more" data-m="${x[0]}"><span class="ico">${ic(x[1])}</span><b>${x[2]}</b><span>${x[3]}</span></button>`).join('')}</div>`;
+}
+const subHead = t => `<div class="sub-head"><button class="ib" data-a="back">${ic('chevL')}</button><div class="h2">${t}</div></div>`;
+
+/* фокус-таймер */
+const fmtLeft = s => pad(Math.floor(s / 60)) + ':' + pad(s % 60);
+function focusDur() { return (D.focus.mode === 'work' ? D.settings.focusWork : D.settings.focusBreak) * 60; }
+function focusLeft() { const f = D.focus; if (f.running) return Math.max(0, Math.ceil((f.endAt - Date.now()) / 1000)); return f.left || focusDur(); }
+function vFocus() {
+  const f = D.focus, left = focusLeft(), tot = f.total || focusDur(), T = today();
+  const open = sortT(tasksFor(T).filter(t => !isDone(t, T)).concat(overdue()));
+  let week = 0; for (let i = 0; i < 7; i++) week += D.focusLog[addDays(T, -i)] || 0;
+  return subHead('Фокус') + `<div class="fz"><div class="seg"><button class="${f.mode === 'work' ? 'on' : ''}" data-a="fMode" data-m="work">Работа</button><button class="${f.mode === 'break' ? 'on' : ''}" data-a="fMode" data-m="break">Перерыв</button></div>
+  <div class="fz-ring">${ring(1 - left / tot, 240, 12, 'fz-arc')}<div class="in"><div class="tm" id="fz-time">${fmtLeft(left)}</div><div class="md">${f.mode === 'work' ? 'время работать' : 'время отдыхать'}</div></div></div>
+  <div class="fz-btns"><button class="ib" data-a="fReset">${ic('reset')}</button><button class="fz-main" data-a="${f.running ? 'fPause' : 'fStart'}">${ic(f.running ? 'pause' : 'play', 'f')}</button><button class="ib" data-a="fSkip">${ic('skip')}</button></div></div>
+  <div class="card"><div class="lbl" style="margin-top:0">${ic('target')}Над чем работаем</div><select class="inp" id="fTask"><option value="">— без задачи —</option>${open.map(t => `<option value="${t.id}" ${f.taskId === t.id ? 'selected' : ''}>${esc(t.title)}</option>`).join('')}</select>
+  ${f.taskId && byId(f.taskId) ? `<button class="btn sm ghost mt" data-a="fDone">${ic('check','s')}Задача выполнена</button>` : ''}</div>
+  <div class="card"><div class="row"><div class="rl">Работа<small>минут</small></div><div class="step"><button data-a="fStep" data-k="focusWork" data-d="-5">−</button><b>${D.settings.focusWork}</b><button data-a="fStep" data-k="focusWork" data-d="5">+</button></div></div>
+  <div class="row"><div class="rl">Перерыв<small>минут</small></div><div class="step"><button data-a="fStep" data-k="focusBreak" data-d="-1">−</button><b>${D.settings.focusBreak}</b><button data-a="fStep" data-k="focusBreak" data-d="1">+</button></div></div></div>
+  <div class="stats"><div class="stat"><b>${D.focusLog[T] || 0}</b><span>минут фокуса сегодня</span></div><div class="stat"><b>${week}</b><span>минут за 7 дней</span></div></div>`;
+}
+function focusStart() {
+  const f = D.focus, left = focusLeft();
+  if (!f.total) f.total = focusDur();
+  if (!A && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  f.endAt = Date.now() + left * 1000; f.running = true;
+  const w = f.mode === 'work';
+  try { A && A.startTimer(left, w ? 'Фокус завершён' : 'Перерыв окончен', w ? 'Отличная работа! Время сделать перерыв.' : 'Пора вернуться к делам.'); } catch (e) {}
+  save(); render();
+}
+let actx = null;
+function beep() {
+  try { if (!actx) return; [0, .35, .7].forEach(t => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(.25, actx.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + t + .3); o.connect(g); g.connect(actx.destination); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + .3); }); } catch (e) {}
+  try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
+}
+function focusPause() { const f = D.focus; f.left = focusLeft(); f.running = false; try { A && A.cancelTimer(); } catch (e) {} save(); render(); }
+function focusReset(silent) { const f = D.focus; f.running = false; f.left = 0; f.total = 0; try { A && A.cancelTimer(); } catch (e) {} if (!silent) { save(); render(); } }
+function focusComplete() {
+  const f = D.focus;
+  if (f.mode === 'work') { const T = today(); D.focusLog[T] = (D.focusLog[T] || 0) + Math.round((f.total || focusDur()) / 60); }
+  const was = f.mode; f.mode = was === 'work' ? 'break' : 'work'; f.running = false; f.left = 0; f.total = 0;
+  save(); render(); toast(was === 'work' ? 'Сессия завершена — отдохните' : 'Перерыв окончен');
+  if (!A) beep();
+}
+setInterval(() => {
+  const f = D.focus;
+  if (f.running && Date.now() >= f.endAt) { focusComplete(); return; }
+  const el = $('#fz-time');
+  if (el && f.running) {
+    const left = focusLeft(), tot = f.total || focusDur(); el.textContent = fmtLeft(left);
+    const a = $('#fz-arc'); if (a) { const c = parseFloat(a.getAttribute('stroke-dasharray')); a.setAttribute('stroke-dashoffset', (c * (left / tot)).toFixed(2)); }
+  }
+}, 1000);
+
+/* статистика */
+function bars(vals, labels, unit) {
+  const W = 320, H = 150, max = Math.max(1, ...vals), bw = W / vals.length;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" width="100%">${vals.map((v, i) => {
+    const h = Math.max(v ? 4 : 2, (v / max) * (H - 40)), x = i * bw + bw * .2, w = bw * .6, y = H - 20 - h;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="${v ? 'var(--acc)' : 'var(--card2)'}"/>${v ? `<text x="${x + w / 2}" y="${y - 5}" text-anchor="middle" style="fill:var(--text);font-weight:600">${v}</text>` : ''}<text x="${x + w / 2}" y="${H - 4}" text-anchor="middle">${labels[i]}</text>`;
+  }).join('')}</svg>`;
+}
+function vStats() {
+  const T = today(), days = [], vals = [], fv = [];
+  for (let i = 6; i >= 0; i--) { const k = addDays(T, -i); days.push(WD[isoW(pk(k)) - 1]); vals.push(completionsOn(k)); fv.push(D.focusLog[k] || 0); }
+  let all = 0; D.tasks.forEach(t => all += isRep(t) ? t.doneDates.length : (t.done ? 1 : 0));
+  let streak = 0, k = T; if (!completionsOn(k)) k = addDays(k, -1);
+  while (completionsOn(k) && streak < 3650) { streak++; k = addDays(k, -1); }
+  const openTasks = D.tasks.filter(t => !isRep(t) && !t.done);
+  const byCat = D.cats.map(c => [c, openTasks.filter(t => t.cat === c.id).length]).filter(x => x[1]);
+  const noCat = openTasks.filter(t => !catOf(t.cat)).length;
+  const maxC = Math.max(1, ...byCat.map(x => x[1]), noCat);
+  let hp = 0, hs = 0;
+  D.habits.forEach(h => { for (let i = 0; i < 7; i++) { const kk = addDays(T, -i); if (habitSched(h, kk)) { hs++; if (h.done.includes(kk)) hp++; } } });
+  return subHead('Статистика') + `<div class="stats"><div class="stat"><b>${vals[6]}</b><span>выполнено сегодня</span></div><div class="stat"><b>${vals.reduce((a, b) => a + b, 0)}</b><span>за 7 дней</span></div>
+  <div class="stat"><b style="display:flex;align-items:center;gap:6px;color:var(--warn)">${ic('flame')}${streak}</b><span>${plural(streak,'день','дня','дней')} подряд</span></div><div class="stat"><b>${all}</b><span>всего выполнено</span></div>
+  <div class="stat"><b>${overdue().length}</b><span>просрочено</span></div><div class="stat"><b>${hs ? Math.round(hp / hs * 100) : 0}%</b><span>привычек за неделю</span></div></div>
+  <div class="card"><div class="lbl" style="margin-top:0">Выполненные задачи · 7 дней</div>${bars(vals, days)}</div>
+  <div class="card"><div class="lbl" style="margin-top:0">Минуты фокуса · 7 дней</div>${bars(fv, days)}</div>
+  <div class="card"><div class="lbl" style="margin-top:0">Открытые задачи по категориям</div>${byCat.map(([c, n]) => `<div class="bar-row"><span class="bn">${esc(c.name)}</span><span class="bt"><i style="width:${n / maxC * 100}%;background:${c.color}"></i></span><span class="bv">${n}</span></div>`).join('')}${noCat ? `<div class="bar-row"><span class="bn">Без категории</span><span class="bt"><i style="width:${noCat / maxC * 100}%;background:var(--muted)"></i></span><span class="bv">${noCat}</span></div>` : ''}${!byCat.length && !noCat ? '<div class="muted">Открытых задач нет</div>' : ''}</div>
+  <div class="card"><div class="lbl" style="margin-top:0">Привычки · лучшие серии</div>${D.habits.map(h => `<div class="bar-row"><span class="bn">${esc(h.name)}</span><span class="streak" style="margin-left:auto">${ic('flame')}${habitStreak(h)}</span><span class="muted" style="font-size:12px;width:70px;text-align:right">рекорд ${habitBest(h)}</span></div>`).join('') || '<div class="muted">Привычек пока нет</div>'}</div>`;
+}
+
+/* настройки */
+let devInfo = null;
+function getInfo() { try { devInfo = A ? JSON.parse(A.info()) : null; } catch (e) { devInfo = null; } return devInfo; }
+const seg = (k, opts) => `<div class="seg">${opts.map(o => `<button class="${String(D.settings[k]) === String(o[0]) ? 'on' : ''}" data-a="set" data-k="${k}" data-v="${o[0]}">${o[1]}</button>`).join('')}</div>`;
+const sel = (k, opts) => `<select class="sel" data-set="${k}">${opts.map(o => `<option value="${o[0]}" ${String(D.settings[k]) === String(o[0]) ? 'selected' : ''}>${o[1]}</option>`).join('')}</select>`;
+const stat = (ok, y, n) => `<span class="st ${ok ? 'ok' : 'bad'}">${ok ? ic('check','s') + y : ic('x','s') + n}</span>`;
+function vSettings() {
+  const s = D.settings, inf = getInfo();
+  let h = subHead('Настройки');
+  h += `<div class="card"><div class="lbl" style="margin-top:0">${ic('moon')}Оформление</div>
+  <div class="row"><div class="rl">Тема</div>${seg('theme', [['dark','Тёмная'],['light','Светлая'],['auto','Авто']])}</div>
+  <div class="row" style="display:block"><div class="rl" style="margin-bottom:10px">Цвет акцента</div><div class="colors">${ACCENTS.map(c => `<button class="${s.accent === c ? 'on' : ''}" style="background:${c}" data-a="set" data-k="accent" data-v="${c}">${s.accent === c ? ic('check') : ''}</button>`).join('')}</div></div>
+  <div class="row"><div class="rl">Неделя начинается с</div>${seg('weekMon', [['true','Пн'],['false','Вс']])}</div></div>`;
+  h += `<div class="card and-only"><div class="lbl" style="margin-top:0">${ic('bell')}Напоминания</div>
+  <div class="row"><div class="rl">По умолчанию<small>когда у задачи есть время</small></div>${sel('defRemind', REMINDS)}</div>
+  <div class="row"><div class="rl">Кнопка «Отложить»</div>${sel('snooze', [[5,'на 5 мин'],[10,'на 10 мин'],[15,'на 15 мин'],[30,'на 30 мин'],[60,'на 1 час']])}</div>
+  ${inf ? `<div class="row"><div class="rl">Уведомления<small>${stat(inf.notif, 'разрешены', 'выключены')}</small></div><button class="btn sm ghost" data-a="perm" data-p="notif">Открыть</button></div>
+  <div class="row"><div class="rl">Точное время<small>${stat(inf.exact, 'разрешено', 'нужно разрешить')}</small></div><button class="btn sm ghost" data-a="perm" data-p="alarm">Открыть</button></div>
+  <div class="row"><div class="rl">Работа в фоне<small>${stat(inf.battery, 'без ограничений', 'может опаздывать')}</small></div><button class="btn sm ghost" data-a="perm" data-p="battery">Открыть</button></div>` : ''}
+  <div class="row"><div class="rl">Проверить<small>придёт тестовое уведомление через 5 секунд</small></div><button class="btn sm" data-a="testN">Тест</button></div></div>`;
+  h += `<div class="card and-only"><div class="lbl" style="margin-top:0">${ic('phone')}Виджет</div>
+  <div class="row"><div class="rl">Стиль</div>${seg('wStyle', [['dark','Тёмный'],['light','Светлый'],['trans','Прозр.']])}</div>
+  <div class="row"><div class="rl">Показывать выполненные</div><button class="sw ${s.wDone ? 'on' : ''}" data-a="set" data-k="wDone" data-v="${!s.wDone}"></button></div></div>`;
+  h += `<div class="card"><div class="lbl" style="margin-top:0">${ic('layers')}Данные</div>
+  <div class="row"><div class="rl">Резервная копия</div><button class="btn sm ghost" data-a="export">${ic('download','s')}Сохранить</button></div>
+  <div class="row"><div class="rl">Восстановить из файла</div><button class="btn sm ghost" data-a="import">${ic('upload','s')}Загрузить</button></div>
+  <div class="row"><div class="rl">Удалить выполненные задачи</div><button class="btn sm ghost" data-a="clearDone">${ic('trash','s')}Очистить</button></div></div>`;
+  if (!A) h += `<div class="card"><div class="lbl" style="margin-top:0">${ic('phone')}Веб-версия</div><div class="muted" style="font-size:13.5px;line-height:1.5">На iPhone недоступны виджет и напоминания по времени — это ограничение Apple для веб-приложений. Задачи и заметки можно переносить между телефонами через «Резервную копию».</div></div>`;
+  h += `<div class="muted" style="text-align:center;font-size:12px;padding:10px 0 20px">Мой день · версия 1.0<br>Все данные хранятся только на вашем телефоне</div>`;
+  return h;
+}
+function vCats() {
+  let h = subHead('Категории') + '<div class="card">';
+  h += D.cats.map(c => `<div class="row"><button class="dot" style="width:26px;height:26px;background:${c.color}" data-a="catColor" data-id="${c.id}"></button><input class="inp" style="flex:1;padding:9px 10px" value="${esc(c.name)}" data-cat="${c.id}"><span class="muted" style="font-size:12px;min-width:20px;text-align:center">${D.tasks.filter(t => t.cat === c.id).length}</span><button class="ib plain" data-a="catDel" data-id="${c.id}">${ic('trash')}</button></div>`).join('') || '<div class="muted">Категорий нет</div>';
+  h += `</div><button class="btn w" data-a="catAdd">${ic('plus','s')}Новая категория</button>`;
+  return h;
+}
+function vWidget() {
+  return subHead('Виджет на рабочем столе') + `<div class="card help"><b>Как добавить</b><ol class="mt"><li>Выйдите на рабочий стол телефона.</li><li>Удерживайте палец на пустом месте, пока не появится меню.</li><li>Нажмите «Виджеты».</li><li>Найдите «Мой день» и перетащите <b>«Мой день: задачи»</b> или <b>«Мой день: заметки»</b> на экран.</li><li>Растяните виджет до нужного размера.</li></ol></div>
+  <div class="card help"><b>Что умеет виджет задач</b><ul class="mt"><li>Показывает задачи на сегодня и просроченные.</li><li>Нажмите на задачу — она отметится выполненной (повторное нажатие снимет отметку).</li><li>Кнопка + сразу открывает новую задачу.</li><li>Полоска сверху показывает прогресс дня.</li></ul></div>
+  <div class="card help"><b>Ярлыки на иконке</b><p class="mt muted">Удерживайте иконку «Мой день» — появятся быстрые действия: новая задача, новая заметка, фокус-таймер.</p></div>
+  <button class="btn w" data-a="more" data-m="settings">${ic('gear','s')}Стиль виджета в настройках</button>`;
+}
+
+/* ---------- отрисовка ---------- */
+const TABS = [['today','sun','Сегодня'],['cal','cal','Календарь'],['notes','note','Заметки'],['habits','target','Привычки'],['more','grid','Ещё']];
+function render() {
+  applyTheme();
+  const v = $('#view');
+  const fn = {today:vToday, cal:vCal, notes:vNotes, habits:vHabits, more:vMore}[S.tab];
+  v.innerHTML = fn();
+  $('#nav').innerHTML = TABS.map(t => `<button class="${S.tab === t[0] ? 'on' : ''}" data-a="tab" data-t="${t[0]}"><span class="pill">${ic(t[1])}</span>${t[2]}</button>`).join('');
+  const fab = $('#fab');
+  fab.innerHTML = ic('plus');
+  fab.classList.toggle('hide', S.tab === 'more');
+}
+function go(tab) { S.tab = tab; S.more = ''; render(); $('#view').scrollTop = 0; }
+
+/* ---------- всплывающие окна ---------- */
+const sheets = [];
+function openSheet(html, o = {}) {
+  const el = document.createElement('div');
+  el.className = 'layer';
+  el.innerHTML = `<div class="scrim"></div><div class="sheet ${o.full ? 'full' : ''}"><div class="grab"></div>${html}</div>`;
+  document.body.appendChild(el);
+  el.offsetHeight;
+  el.classList.add('open');
+  el.querySelector('.scrim').addEventListener('click', () => closeSheet());
+  sheets.push({el, onClose:o.onClose});
+  return el.querySelector('.sheet');
+}
+function closeSheet() {
+  const s = sheets.pop();
+  if (!s) return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  try { s.onClose && s.onClose(); } catch (e) { console.error(e); }
+  s.el.classList.remove('open');
+  setTimeout(() => s.el.remove(), 280);
+}
+function closeAll() { while (sheets.length) closeSheet(); }
+function confirmBox(title, text, ok, fn, danger = true) {
+  const sh = openSheet(`<div class="cf-t">${esc(title)}</div>${text ? `<div class="cf-s">${esc(text)}</div>` : ''}<div class="btns"><button class="btn ghost" data-a="no">Отмена</button><button class="btn ${danger ? 'danger' : ''}" data-a="yes">${esc(ok)}</button></div>`);
+  sh.addEventListener('click', e => { const a = e.target.closest('[data-a]'); if (!a) return; closeSheet(); if (a.dataset.a === 'yes') fn(); });
+}
+let toastT = 0;
+function toast(msg, undo) {
+  const t = $('#toast');
+  t.innerHTML = `<span>${esc(msg)}</span>${undo ? `<button>Отменить</button>` : ''}`;
+  if (undo) t.querySelector('button').onclick = () => { undo(); t.classList.remove('on'); };
+  t.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('on'), undo ? 4500 : 2200);
+}
+const haptic = () => { try { A && A.haptic(); } catch (e) {} };
+
+/* ---------- редактор задачи ---------- */
+function editTask(id, preset) {
+  const orig = id ? byId(id) : null;
+  if (id && !orig) return;
+  const w = orig ? clone(orig) : newTask(preset || {});
+  let deleted = false, remTouched = !!orig;
+  const sh = openSheet('<div class="sc"></div>', {onClose:() => {
+    if (deleted) return;
+    w.title = w.title.trim();
+    w.subs = w.subs.filter(s => s.t.trim());
+    if (!w.title) { if (!orig) return; w.title = orig.title; }
+    if (orig) { const i = D.tasks.indexOf(orig); if (i >= 0) D.tasks[i] = w; else D.tasks.push(w); }
+    else D.tasks.push(w);
+    save(); render();
+  }});
+  const box = $('.sc', sh);
+  function draw() {
+    const T = today(), rep = w.repeat.type;
+    box.innerHTML = `<div class="e-top"><input class="e-title" id="e_t" placeholder="Что нужно сделать?" value="${esc(w.title)}" enterkeyhint="done"><button class="ib on" data-a="close">${ic('check')}</button></div>
+    <textarea class="inp" id="e_n" placeholder="Описание, ссылки, детали…" rows="2">${esc(w.notes)}</textarea>
+    <div class="lbl">${ic('cal')}Дата</div>
+    <div class="chips">${[[T,'Сегодня'],[addDays(T,1),'Завтра'],[addDays(T,2),'Послезавтра'],[addDays(T,7),'Через неделю'],['','Без даты']].map(x => `<button class="chip ${w.date === x[0] ? 'on' : ''}" data-a="date" data-v="${x[0]}">${x[1]}</button>`).join('')}</div>
+    <div class="e-row mt"><input type="date" class="inp" id="e_d" value="${w.date}"><input type="time" class="inp" id="e_tm" value="${w.time}">${w.time ? `<button class="ib" data-a="noTime">${ic('x')}</button>` : ''}</div>
+    <div class="and-only"><div class="lbl">${ic('bell')}Напоминание</div>
+    <select class="inp" id="e_r">${REMINDS.map(r => `<option value="${r[0]}" ${w.remind === r[0] ? 'selected' : ''}>${r[1]}</option>`).join('')}</select>
+    ${w.remind >= 0 && !w.time ? `<div class="hint">${ic('clock')}Укажите время, чтобы напоминание сработало</div>` : ''}
+    ${w.remind >= 0 && !w.date ? `<div class="hint">${ic('cal')}Укажите дату, чтобы напоминание сработало</div>` : ''}</div>
+    <div class="lbl">${ic('repeat')}Повтор</div>
+    <select class="inp" id="e_rp">${REPEATS.map(r => `<option value="${r[0]}" ${rep === r[0] ? 'selected' : ''}>${r[1]}</option>`).join('')}</select>
+    ${rep === 'custom' ? `<div class="chips mt">${WD.map((d, i) => `<button class="chip ${w.repeat.days.includes(i + 1) ? 'on' : ''}" data-a="rday" data-v="${i + 1}">${d}</button>`).join('')}</div>` : ''}
+    ${rep !== 'none' ? `<div class="e-row mt"><span class="muted" style="font-size:13px;white-space:nowrap">Повторять до</span><input type="date" class="inp" id="e_u" value="${w.repeat.until}"></div>` : ''}
+    <div class="lbl">${ic('flag')}Приоритет</div>
+    <div class="chips">${PRIO.map((p, i) => `<button class="chip ${w.prio === i ? 'on' : ''}" data-a="prio" data-v="${i}" ${w.prio === i && i ? `style="background:${p.c}"` : ''}>${i ? `<i class="dot" style="background:${w.prio === i ? '#fff' : p.c}"></i>` : ''}${p.n}</button>`).join('')}</div>
+    <div class="lbl">${ic('tag')}Категория</div>
+    <div class="chips"><button class="chip ${!w.cat ? 'on' : ''}" data-a="cat" data-v="">Без</button>${D.cats.map(c => `<button class="chip ${w.cat === c.id ? 'on' : ''}" data-a="cat" data-v="${c.id}" ${w.cat === c.id ? `style="background:${c.color}"` : ''}><i class="dot" style="background:${w.cat === c.id ? '#fff' : c.color}"></i>${esc(c.name)}</button>`).join('')}<button class="chip" data-a="newCat">${ic('plus')}</button></div>
+    <div class="lbl">${ic('checksq')}Подзадачи ${w.subs.length ? `<span class="cnt" style="text-transform:none">${w.subs.filter(s => s.d).length}/${w.subs.length}</span>` : ''}</div>
+    <div>${w.subs.map((s, i) => `<div class="sub-i ${s.d ? 'd' : ''}"><button class="chk" data-a="subT" data-i="${i}">${ic('check')}</button><input value="${esc(s.t)}" data-sub="${i}"><button class="x" data-a="subX" data-i="${i}">${ic('x')}</button></div>`).join('')}
+    <div class="sub-i"><span class="chk" style="border-style:dashed"></span><input id="e_sa" placeholder="Добавить подзадачу" enterkeyhint="next"></div></div>
+    <div class="e-acts">${orig ? `<button data-a="dup">${ic('copy')}Копия</button>` : ''}${!isRep(w) && orig ? `<button data-a="tmrw">${ic('arrowR')}На завтра</button>` : ''}${orig ? `<button data-a="focus">${ic('timer')}Фокус</button>` : ''}${orig ? `<button class="del" data-a="del">${ic('trash')}Удалить</button>` : ''}</div>
+    ${!orig ? `<button class="btn w mt" data-a="close">${ic('plus','s')}Добавить задачу</button>` : ''}`;
+  }
+  draw();
+  if (!orig) setTimeout(() => { const t = $('#e_t', box); t && t.focus(); }, 300);
+  box.addEventListener('input', e => {
+    const el = e.target;
+    if (el.id === 'e_t') w.title = el.value;
+    else if (el.id === 'e_n') w.notes = el.value;
+    else if (el.dataset.sub !== undefined) { const s = w.subs[+el.dataset.sub]; if (s) s.t = el.value; }
+  });
+  box.addEventListener('change', e => {
+    const el = e.target;
+    if (el.id === 'e_d') { w.date = el.value; draw(); }
+    else if (el.id === 'e_tm') { w.time = el.value; if (w.time && w.remind < 0 && !remTouched) w.remind = D.settings.defRemind; draw(); }
+    else if (el.id === 'e_r') { w.remind = +el.value; remTouched = true; draw(); }
+    else if (el.id === 'e_u') { w.repeat.until = el.value; }
+    else if (el.id === 'e_rp') {
+      w.repeat.type = el.value;
+      if (el.value !== 'none' && !w.date) w.date = today();
+      if (el.value === 'custom' && !w.repeat.days.length) w.repeat.days = [isoW(pk(w.date || today()))];
+      draw();
+    }
+  });
+  box.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (e.target.id === 'e_sa') { e.preventDefault(); const v = e.target.value.trim(); if (v) { w.subs.push({t:v, d:false}); draw(); const n = $('#e_sa', box); n && n.focus(); } }
+    else if (e.target.id === 'e_t') { e.preventDefault(); e.target.blur(); }
+  });
+  box.addEventListener('focusout', e => {
+    if (e.target.id === 'e_sa') { const v = e.target.value.trim(); if (v) { w.subs.push({t:v, d:false}); e.target.value = ''; setTimeout(draw, 0); } }
+  });
+  box.addEventListener('click', e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    const v = a.dataset.v;
+    switch (a.dataset.a) {
+      case 'close': closeSheet(); return;
+      case 'date': w.date = v; if (!v && isRep(w)) w.repeat.type = 'none'; break;
+      case 'noTime': w.time = ''; break;
+      case 'prio': w.prio = +v; break;
+      case 'cat': w.cat = v; break;
+      case 'rday': { const d = +v, i = w.repeat.days.indexOf(d); if (i >= 0) { if (w.repeat.days.length > 1) w.repeat.days.splice(i, 1); } else w.repeat.days.push(d); w.repeat.days.sort(); break; }
+      case 'subT': { const s = w.subs[+a.dataset.i]; if (s) s.d = !s.d; break; }
+      case 'subX': w.subs.splice(+a.dataset.i, 1); break;
+      case 'newCat': promptText('Новая категория', '', 'Название', name => { const c = {id:uid(), name, color:ACCENTS[D.cats.length % ACCENTS.length]}; D.cats.push(c); w.cat = c.id; save(); draw(); }); return;
+      case 'dup': { const c = clone(w); c.id = uid(); c.created = Date.now(); c.done = false; c.doneDates = []; c.title = w.title.trim() || 'Копия'; D.tasks.push(c); save(); toast('Копия создана'); return; }
+      case 'tmrw': w.date = addDays(w.date && w.date > today() ? w.date : today(), 1); w.done = false; closeSheet(); toast('Перенесено на ' + human(w.date).toLowerCase()); return;
+      case 'focus': closeSheet(); D.focus.taskId = w.id; S.tab = 'more'; S.more = 'focus'; save(); render(); return;
+      case 'del': {
+        deleted = true; const i = D.tasks.indexOf(orig); if (i >= 0) D.tasks.splice(i, 1); save(); closeSheet(); render();
+        toast('Задача удалена', () => { D.tasks.splice(Math.max(0, i), 0, orig); save(); render(); }); return;
+      }
+      default: return;
+    }
+    draw();
+  });
+}
+function promptText(title, val, ph, fn) {
+  const sh = openSheet(`<div class="cf-t">${esc(title)}</div><input class="inp mt" id="pt" value="${esc(val)}" placeholder="${esc(ph)}" enterkeyhint="done"><div class="btns"><button class="btn ghost" data-a="no">Отмена</button><button class="btn" data-a="yes">Готово</button></div>`);
+  const inp = $('#pt', sh);
+  setTimeout(() => inp.focus(), 280);
+  const ok = () => { const v = inp.value.trim(); closeSheet(); if (v) fn(v); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
+  sh.addEventListener('click', e => { const a = e.target.closest('[data-a]'); if (!a) return; if (a.dataset.a === 'yes') ok(); else closeSheet(); });
+}
+
+/* ---------- редактор заметки ---------- */
+const noteEmpty = n => !n.title.trim() && !n.body.trim() && !n.items.some(i => i.t.trim());
+function openNote(id) {
+  let n = id ? D.notes.find(x => x.id === id) : null;
+  if (id && !n) return;
+  if (!n) { n = newNote(S.nf.startsWith('tag:') ? {tags:[S.nf.slice(4)]} : {}); D.notes.unshift(n); }
+  const nid = n.id, N = () => D.notes.find(x => x.id === nid);
+  let colors = false;
+  const sh = openSheet('<div class="sc ned"></div>', {full:true, onClose:() => {
+    const x = N(); if (x && noteEmpty(x)) D.notes = D.notes.filter(z => z.id !== nid);
+    save(); render();
+  }});
+  const box = $('.sc', sh);
+  const touch = () => { const x = N(); if (x) { x.updated = Date.now(); save(); const f = $('.ned-foot', box); if (f) f.innerHTML = foot(x); } };
+  const foot = x => `Изменено: ${fmtStamp(x.updated)} · ${(x.list ? x.items.map(i => i.t).join('') : x.body).length} симв.`;
+  function draw() {
+    const x = N(); if (!x) { closeSheet(); return; }
+    sh.style.background = x.color ? `linear-gradient(${rgba(x.color, .14)},${rgba(x.color, .14)}),var(--bg)` : '';
+    const its = x.items.map((it, i) => [it, i]).sort((a, b) => a[0].d - b[0].d);
+    box.innerHTML = `<div class="ned-top"><button class="ib plain" data-a="close">${ic('chevL')}</button><div class="sp"></div>
+      <button class="ib plain ${x.pinned ? 'on' : ''}" data-a="pin">${ic('pin')}</button><button class="ib plain and-only ${x.remind ? 'on' : ''}" data-a="rem">${ic('bell')}</button>
+      <button class="ib plain ${colors ? 'on' : ''}" data-a="col">${ic('drop')}</button><button class="ib plain ${x.list ? 'on' : ''}" data-a="list">${ic('checksq')}</button><button class="ib plain" data-a="menu">${ic('dots')}</button></div>
+      ${colors ? `<div class="colors" style="padding:6px 0 10px">${NCOL.map(c => `<button class="${x.color === c ? 'on' : ''}" style="background:${c || 'var(--card2)'}" data-a="color" data-v="${c}">${x.color === c ? ic('check') : ''}</button>`).join('')}</div>` : ''}
+      ${x.remind && A ? `<div class="ned-rem">${ic('bell')}<input type="datetime-local" id="n_r" value="${x.remind}"><button class="ib plain" data-a="remX">${ic('x')}</button></div>` : ''}
+      ${x.trashed ? `<div class="hint">${ic('trash')}Заметка в корзине</div>` : ''}
+      <input class="ned-title" id="n_t" placeholder="Заголовок" value="${esc(x.title)}">
+      ${x.list ? `<div>${its.map(([it, i]) => `<div class="sub-i ${it.d ? 'd' : ''}"><button class="chk" data-a="it" data-i="${i}">${ic('check')}</button><input value="${esc(it.t)}" data-item="${i}"><button class="x" data-a="itX" data-i="${i}">${ic('x')}</button></div>`).join('')}<div class="sub-i"><span class="chk" style="border-style:dashed"></span><input id="n_add" placeholder="Новый пункт" enterkeyhint="next"></div></div>`
+        : `<textarea class="ned-body" id="n_b" placeholder="Текст заметки…">${esc(x.body)}</textarea>`}
+      <input class="ned-tags" id="n_g" placeholder="# теги через запятую" value="${esc(x.tags.join(', '))}">
+      <div class="ned-foot">${foot(x)}</div>`;
+    const b = $('#n_b', box); if (b) autoGrow(b);
+  }
+  draw();
+  if (!id) setTimeout(() => { const t = $('#n_t', box); t && t.focus(); }, 300);
+  box.addEventListener('input', e => {
+    const el = e.target, x = N(); if (!x) return;
+    if (el.id === 'n_t') x.title = el.value;
+    else if (el.id === 'n_b') { x.body = el.value; autoGrow(el); }
+    else if (el.id === 'n_g') x.tags = el.value.split(',').map(s => s.trim().replace(/^#/, '')).filter(Boolean);
+    else if (el.dataset.item !== undefined) { const it = x.items[+el.dataset.item]; if (it) it.t = el.value; }
+    else return;
+    touch();
+  });
+  box.addEventListener('change', e => { if (e.target.id === 'n_r') { const x = N(); x.remind = e.target.value; touch(); } });
+  const addItem = el => { const v = el.value.trim(); if (!v) return false; const x = N(); x.items.push({t:v, d:false}); el.value = ''; touch(); return true; };
+  box.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.id === 'n_add') { e.preventDefault(); if (addItem(e.target)) { draw(); const a = $('#n_add', box); a && a.focus(); } }
+  });
+  box.addEventListener('focusout', e => { if (e.target.id === 'n_add' && addItem(e.target)) setTimeout(draw, 0); });
+  box.addEventListener('click', e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    const x = N(); if (!x) return;
+    switch (a.dataset.a) {
+      case 'close': closeSheet(); return;
+      case 'pin': x.pinned = !x.pinned; break;
+      case 'col': colors = !colors; draw(); return;
+      case 'color': x.color = a.dataset.v; break;
+      case 'rem': if (!x.remind) { const d = new Date(Date.now() + 3600e3); d.setMinutes(0); x.remind = key(d) + 'T' + pad(d.getHours()) + ':00'; toast('Напоминание добавлено — время можно изменить'); } break;
+      case 'remX': x.remind = ''; break;
+      case 'list':
+        if (!x.list) { x.items = x.body.split('\n').map(s => s.replace(/^[-*•]\s*/, '').trim()).filter(Boolean).map(t => ({t, d:false})); x.body = ''; x.list = true; }
+        else { x.body = x.items.map(i => (i.d ? '✓ ' : '') + i.t).join('\n'); x.items = []; x.list = false; }
+        break;
+      case 'it': { const it = x.items[+a.dataset.i]; if (it) it.d = !it.d; haptic(); break; }
+      case 'itX': x.items.splice(+a.dataset.i, 1); break;
+      case 'menu': noteMenu(nid, draw); return;
+      default: return;
+    }
+    touch(); draw();
+  });
+}
+function autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, window.innerHeight * .45) + 'px'; }
+function noteMenu(nid, redraw) {
+  const x = D.notes.find(n => n.id === nid);
+  const it = [['share','share','Поделиться'],['copy','copy','Дублировать'],['toTask','checksq','Создать задачу из заметки']];
+  if (!x.trashed) it.push(['arch','archive', x.archived ? 'Вернуть из архива' : 'В архив'], ['trash','trash','Удалить в корзину', 'red']);
+  else it.push(['restore','undo','Восстановить'], ['kill','trash','Удалить навсегда', 'red']);
+  const sh = openSheet(`<div class="list-act">${it.map(i => `<button data-a="${i[0]}" class="${i[3] || ''}">${ic(i[1])}${i[2]}</button>`).join('')}</div>`);
+  sh.addEventListener('click', e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    closeSheet();
+    const txt = (x.title ? x.title + '\n\n' : '') + (x.list ? x.items.map(i => (i.d ? '☑ ' : '☐ ') + i.t).join('\n') : x.body);
+    switch (a.dataset.a) {
+      case 'share': if (A) A.share(txt); else if (navigator.share) navigator.share({text:txt}).catch(() => {}); else if (navigator.clipboard) { navigator.clipboard.writeText(txt); toast('Скопировано'); } break;
+      case 'copy': { const c = clone(x); c.id = uid(); c.created = c.updated = Date.now(); c.title = (c.title || 'Заметка') + ' (копия)'; D.notes.unshift(c); save(); toast('Копия создана'); break; }
+      case 'toTask': { const t = newTask({title:x.title || (x.body || '').split('\n')[0].slice(0, 80) || 'Задача из заметки', notes:x.list ? '' : x.body, subs:x.list ? x.items.map(i => ({t:i.t, d:i.d})) : []}); D.tasks.push(t); save(); toast('Задача создана на сегодня'); break; }
+      case 'arch': x.archived = !x.archived; x.updated = Date.now(); save(); closeSheet(); toast(x.archived ? 'Перемещено в архив' : 'Возвращено из архива'); break;
+      case 'trash': x.trashed = true; x.updated = Date.now(); save(); closeSheet(); toast('Заметка в корзине', () => { x.trashed = false; save(); render(); }); break;
+      case 'restore': x.trashed = false; x.archived = false; save(); redraw(); toast('Заметка восстановлена'); break;
+      case 'kill': confirmBox('Удалить навсегда?', 'Заметку нельзя будет вернуть', 'Удалить', () => { D.notes = D.notes.filter(n => n.id !== nid); save(); closeSheet(); }); break;
+    }
+  });
+}
+
+/* ---------- редактор привычки ---------- */
+function editHabit(id) {
+  const orig = id ? D.habits.find(h => h.id === id) : null;
+  const w = orig ? clone(orig) : {id:uid(), name:'', color:ACCENTS[D.habits.length % ACCENTS.length], days:[1,2,3,4,5,6,7], done:[], remind:'', created:Date.now()};
+  let deleted = false;
+  const sh = openSheet('<div class="sc"></div>', {onClose:() => {
+    if (deleted) return; w.name = w.name.trim(); if (!w.name) return;
+    if (orig) Object.assign(orig, w); else D.habits.push(w);
+    save(); render();
+  }});
+  const box = $('.sc', sh);
+  const IDEAS = ['Выпить воду','Зарядка','Чтение 20 минут','Прогулка','Медитация','Без сладкого','Английский','Лечь до 23:00'];
+  function draw() {
+    const T = today();
+    let heat = '';
+    if (orig) { const st = addDays(T, -34); for (let i = 0; i < 35; i++) { const k = addDays(st, i); heat += `<i class="${w.done.includes(k) ? 'on' : ''} ${habitSched(w, k) ? '' : 'na'}"></i>`; } }
+    box.style.setProperty('--hc', w.color);
+    box.innerHTML = `<div class="e-top"><input class="e-title" id="h_n" placeholder="Название привычки" value="${esc(w.name)}"><button class="ib on" data-a="close">${ic('check')}</button></div>
+    ${!orig ? `<div class="chips">${IDEAS.map(x => `<button class="chip" data-a="idea" data-v="${x}">${x}</button>`).join('')}</div>` : ''}
+    <div class="lbl">Цвет</div><div class="colors">${ACCENTS.map(c => `<button class="${w.color === c ? 'on' : ''}" style="background:${c}" data-a="color" data-v="${c}">${w.color === c ? ic('check') : ''}</button>`).join('')}</div>
+    <div class="lbl">Дни</div><div class="chips">${WD.map((d, i) => `<button class="chip ${w.days.includes(i + 1) ? 'on' : ''}" data-a="day" data-v="${i + 1}">${d}</button>`).join('')}</div>
+    <div class="chips mt"><button class="chip" data-a="days" data-v="1234567">Каждый день</button><button class="chip" data-a="days" data-v="12345">Будни</button><button class="chip" data-a="days" data-v="67">Выходные</button></div>
+    <div class="and-only"><div class="lbl">${ic('bell')}Напоминание</div><div class="e-row"><input type="time" class="inp" id="h_r" value="${w.remind}">${w.remind ? `<button class="ib" data-a="remX">${ic('x')}</button>` : ''}</div></div>
+    ${orig ? `<div class="lbl">Последние 5 недель</div><div class="heat">${heat}</div>
+    <div class="stats mt"><div class="stat" style="background:var(--card2)"><b class="streak" style="font-size:22px">${ic('flame')}${habitStreak(w)}</b><span>текущая серия</span></div><div class="stat" style="background:var(--card2)"><b>${habitBest(w)}</b><span>рекорд · всего ${w.done.length}</span></div></div>
+    <button class="btn danger w" data-a="del">${ic('trash','s')}Удалить привычку</button>` : `<button class="btn w mt" data-a="close">${ic('plus','s')}Добавить привычку</button>`}`;
+  }
+  draw();
+  box.addEventListener('input', e => { if (e.target.id === 'h_n') w.name = e.target.value; });
+  box.addEventListener('change', e => { if (e.target.id === 'h_r') { w.remind = e.target.value; draw(); } });
+  box.addEventListener('click', e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    const v = a.dataset.v;
+    switch (a.dataset.a) {
+      case 'close': closeSheet(); return;
+      case 'idea': w.name = v; break;
+      case 'color': w.color = v; break;
+      case 'day': { const d = +v, i = w.days.indexOf(d); if (i >= 0) { if (w.days.length > 1) w.days.splice(i, 1); } else w.days.push(d); w.days.sort(); break; }
+      case 'days': w.days = v.split('').map(Number); break;
+      case 'remX': w.remind = ''; break;
+      case 'del': confirmBox('Удалить привычку?', 'Вся история отметок тоже удалится', 'Удалить', () => { deleted = true; D.habits = D.habits.filter(h => h.id !== w.id); save(); closeSheet(); render(); }); return;
+      default: return;
+    }
+    draw();
+  });
+}
+
+/* ---------- поиск ---------- */
+function openSearch() {
+  const sh = openSheet(`<div class="sc"><div class="e-row" style="padding:8px 0"><button class="ib plain" data-a="close">${ic('chevL')}</button><div class="search" style="flex:1;margin:0">${ic('search')}<input id="sq" placeholder="Задачи и заметки…"></div></div><div id="sr"></div></div>`, {full:true});
+  const inp = $('#sq', sh), out = $('#sr', sh);
+  setTimeout(() => inp.focus(), 300);
+  const run = () => {
+    const q = inp.value.trim().toLowerCase();
+    if (!q) { out.innerHTML = `<div class="empty">Начните вводить текст</div>`; return; }
+    const ts = D.tasks.filter(t => (t.title + ' ' + t.notes + ' ' + t.subs.map(s => s.t).join(' ')).toLowerCase().includes(q)).slice(0, 40);
+    const ns = D.notes.filter(n => !n.trashed && (n.title + ' ' + n.body + ' ' + n.items.map(i => i.t).join(' ') + ' ' + n.tags.join(' ')).toLowerCase().includes(q)).slice(0, 40);
+    out.innerHTML = (ts.length ? `<div class="sec"><span>Задачи<span class="cnt">${ts.length}</span></span></div>` + ts.map(t => taskRow(t, isRep(t) ? today() : t.date, {showDate:true})).join('') : '')
+      + (ns.length ? `<div class="sec"><span>Заметки<span class="cnt">${ns.length}</span></span></div><div class="ngrid">${ns.map(noteCard).join('')}</div>` : '')
+      || `<div class="empty">Ничего не найдено</div>`;
+  };
+  run();
+  inp.addEventListener('input', run);
+  sh.addEventListener('click', e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    if (a.dataset.a === 'close') closeSheet();
+    else if (a.dataset.a === 'toggle') { toggleTask(a.dataset.id, a.dataset.k, null); run(); }
+    else if (a.dataset.a === 'edit') editTask(a.dataset.id);
+    else if (a.dataset.a === 'note') openNote(a.dataset.id);
+  });
+}
+
+/* ---------- действия ---------- */
+function toggleTask(id, k, rowEl) {
+  const t = byId(id); if (!t) return;
+  if (!k) k = isRep(t) ? today() : (t.date || today());
+  const was = isDone(t, k);
+  setDone(t, k, !was);
+  save();
+  if (!was) {
+    haptic();
+    toast('Выполнено: ' + t.title.slice(0, 40), () => { setDone(t, k, false); save(); render(); });
+    if (rowEl) { rowEl.classList.add('done', 'pop'); setTimeout(() => render(), 320); return; }
+  }
+  render();
+}
+function exportData() {
+  flush();
+  const s = JSON.stringify(D, null, 1), name = 'moy-den-' + today() + '.json';
+  if (A) A.exportData(s, name);
+  else {
+    try { const f = new File([s], name, {type:'application/json'}); if (navigator.canShare && navigator.canShare({files:[f]})) { navigator.share({files:[f], title:name}).catch(() => {}); return; } } catch (e) {}
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([s], {type:'application/json'})); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  }
+}
+window.onImport = text => {
+  let o = null;
+  try { o = JSON.parse(text); } catch (e) {}
+  if (!o || !Array.isArray(o.tasks)) { toast('Это не файл резервной копии'); return; }
+  confirmBox('Восстановить данные?', `В файле: ${o.tasks.length} задач, ${(o.notes || []).length} заметок. Текущие данные будут заменены.`, 'Восстановить', () => {
+    D = normalize(o); saveData(D); closeAll(); render(); toast('Данные восстановлены');
+  }, false);
+};
+function importData() {
+  if (A) { A.importData(); return; }
+  const i = document.createElement('input'); i.type = 'file'; i.accept = '.json,application/json';
+  i.onchange = () => { const f = i.files[0]; if (f) f.text().then(window.onImport); }; i.click();
+}
+function fabClick() {
+  if (S.tab === 'today') editTask(null, {date:today()});
+  else if (S.tab === 'cal') editTask(null, {date:S.calSel});
+  else if (S.tab === 'notes') openNote(null);
+  else if (S.tab === 'habits') editHabit(null);
+}
+function setSetting(k, raw) {
+  let v = raw;
+  if (raw === 'true') v = true; else if (raw === 'false') v = false; else if (raw !== '' && !isNaN(raw) && k !== 'accent') v = +raw;
+  D.settings[k] = v; save(); render();
+}
+
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-a]');
+  if (!a || a.closest('.layer')) return;
+  const d = a.dataset;
+  switch (d.a) {
+    case 'tab': go(d.t); break;
+    case 'toggle': toggleTask(d.id, d.k, a.closest('.task')); break;
+    case 'edit': editTask(d.id); break;
+    case 'search': openSearch(); break;
+    case 'view': D.settings.view = D.settings.view === 'timeline' ? 'list' : 'timeline'; save(); render(); break;
+    case 'addAt': editTask(null, {date:d.k, time:d.t, remind:D.settings.defRemind}); break;
+    case 'col': S.col[d.c] = !S.col[d.c]; render(); break;
+    case 'odAll': { const od = overdue(), T = today(), prev = od.map(t => [t, t.date]); od.forEach(t => t.date = T); save(); render(); toast(`Перенесено: ${od.length}`, () => { prev.forEach(([t, k]) => t.date = k); save(); render(); }); break; }
+    case 'calNav': { const [y, m] = S.calMonth.split('-').map(Number); const n = new Date(y, m - 1 + +d.d, 1); S.calMonth = n.getFullYear() + '-' + pad(n.getMonth() + 1); render(); break; }
+    case 'calToday': S.calSel = today(); S.calMonth = ''; render(); break;
+    case 'day': S.calSel = d.k; if (d.k.slice(0, 7) !== S.calMonth) S.calMonth = d.k.slice(0, 7); render(); break;
+    case 'nf': S.nf = d.f; render(); break;
+    case 'note': openNote(d.id); break;
+    case 'emptyTrash': confirmBox('Очистить корзину?', 'Заметки удалятся навсегда', 'Очистить', () => { D.notes = D.notes.filter(n => !n.trashed); save(); render(); }); break;
+    case 'habit': {
+      const h = D.habits.find(x => x.id === d.id); if (!h) break;
+      const i = h.done.indexOf(d.k); if (i >= 0) h.done.splice(i, 1); else { h.done.push(d.k); haptic(); }
+      save(); render(); break;
+    }
+    case 'habitEdit': editHabit(d.id); break;
+    case 'more': if (d.m === 'backup') { backupSheet(); break; } S.tab = 'more'; S.more = d.m; render(); $('#view').scrollTop = 0; break;
+    case 'back': S.more = ''; render(); break;
+    case 'fStart': focusStart(); break;
+    case 'fPause': focusPause(); break;
+    case 'fReset': focusReset(); break;
+    case 'fSkip': D.focus.mode = D.focus.mode === 'work' ? 'break' : 'work'; focusReset(); break;
+    case 'fMode': if (D.focus.mode !== d.m) { D.focus.mode = d.m; focusReset(); } break;
+    case 'fStep': { if (D.focus.running) { toast('Сначала поставьте таймер на паузу'); break; } const k = d.k, mn = k === 'focusWork' ? 5 : 1; D.settings[k] = Math.max(mn, Math.min(180, D.settings[k] + +d.d)); focusReset(); break; }
+    case 'fDone': { const t = byId(D.focus.taskId); if (t) { setDone(t, isRep(t) ? today() : (t.date || today()), true); D.focus.taskId = ''; save(); render(); toast('Задача выполнена'); } break; }
+    case 'set': setSetting(d.k, d.v); break;
+    case 'perm': try { A && A.openSettings(d.p); } catch (err) {} break;
+    case 'testN': if (A) { if (devInfo && !devInfo.notif) A.requestNotif(); A.testNotify(); toast('Уведомление придёт через 5 секунд'); } else toast('Работает только в приложении'); break;
+    case 'export': exportData(); break;
+    case 'import': importData(); break;
+    case 'clearDone': {
+      const n = D.tasks.filter(t => !isRep(t) && t.done).length;
+      if (!n) { toast('Выполненных задач нет'); break; }
+      confirmBox(`Удалить ${n} ${plural(n,'задачу','задачи','задач')}?`, 'Повторяющиеся задачи не затрагиваются', 'Удалить', () => { D.tasks = D.tasks.filter(t => isRep(t) || !t.done); save(); render(); });
+      break;
+    }
+    case 'catAdd': promptText('Новая категория', '', 'Название', name => { D.cats.push({id:uid(), name, color:ACCENTS[D.cats.length % ACCENTS.length]}); save(); render(); }); break;
+    case 'catColor': { const c = catOf(d.id); if (c) { c.color = ACCENTS[(ACCENTS.indexOf(c.color) + 1) % ACCENTS.length]; save(); render(); } break; }
+    case 'catDel': { const c = catOf(d.id); if (!c) break; confirmBox(`Удалить «${c.name}»?`, 'Задачи останутся, но без категории', 'Удалить', () => { D.cats = D.cats.filter(x => x.id !== c.id); D.tasks.forEach(t => { if (t.cat === c.id) t.cat = ''; }); save(); render(); }); break; }
+  }
+});
+function backupSheet() {
+  const sh = openSheet(`<div class="cf-t">Резервная копия</div><div class="cf-s">Сохраните файл, чтобы перенести данные на другой телефон или не потерять их</div><div class="btns"><button class="btn ghost" data-a="import">${ic('upload','s')}Загрузить</button><button class="btn" data-a="export">${ic('download','s')}Сохранить</button></div>`);
+  sh.addEventListener('click', e => { const a = e.target.closest('[data-a]'); if (!a) return; closeSheet(); if (a.dataset.a === 'export') exportData(); else importData(); });
+}
+$('#fab').addEventListener('click', fabClick);
+document.addEventListener('submit', e => {
+  const f = e.target.closest('.qa'); if (!f) return;
+  e.preventDefault();
+  const inp = $('input', f), t = quickAdd(inp.value, f.dataset.k);
+  if (!t) return;
+  inp.value = '';
+  render();
+  const n = $('#qa'); if (n) n.focus();
+  toast(t.date && t.date !== f.dataset.k ? 'Добавлено на ' + human(t.date).toLowerCase() : 'Задача добавлена');
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.closest('.layer')) return;
+  if (el.id === 'qa') { const p = $('#qa-prev'); if (p) p.innerHTML = qaPreview(el.value, el.closest('.qa').dataset.k); }
+  else if (el.id === 'nq') { S.nq = el.value; $('#ngrid').innerHTML = noteGrid(); }
+  else if (el.dataset.cat) { const c = catOf(el.dataset.cat); if (c) { c.name = el.value.trim() || c.name; save(); } }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.closest('.layer')) return;
+  if (el.dataset.set) setSetting(el.dataset.set, el.value);
+  else if (el.id === 'fTask') { D.focus.taskId = el.value; save(); render(); }
+});
+
+/* ---------- связь с Android ---------- */
+window.goBack = () => {
+  if (sheets.length) { closeSheet(); return true; }
+  if (S.tab === 'more' && S.more) { S.more = ''; render(); return true; }
+  if (S.tab !== 'today') { go('today'); return true; }
+  return false;
+};
+window.reloadData = () => {
+  clearTimeout(saveT); saveT = 0;
+  D = load();
+  const f = D.focus; if (f.running && Date.now() >= f.endAt) focusComplete();
+  if (!sheets.length) render(); else { applyTheme(); }
+};
+window.appOpen = arg => {
+  arg = String(arg || '');
+  const [k, ...rest] = arg.split(':'), v = rest.join(':');
+  closeAll();
+  if (k === 'quickadd') { go('today'); editTask(null, {date:today()}); }
+  else if (k === 'newnote') { go('notes'); openNote(null); }
+  else if (k === 'tab') go(v || 'today');
+  else if (k === 'task') { go('today'); if (byId(v)) editTask(v); }
+  else if (k === 'note') { go('notes'); openNote(v); }
+  else if (k === 'habit') go('habits');
+  else if (k === 'timer') { S.tab = 'more'; S.more = 'focus'; render(); }
+};
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+window.addEventListener('pagehide', flush);
+
+function isStandalone() { return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }
+if (!A && 'serviceWorker' in navigator && location.protocol.startsWith('http')) { window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {})); try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {} }
+
+/* старт */
+(function start() {
+  const f = D.focus; if (f.running && Date.now() >= f.endAt) focusComplete();
+  render();
+  if (A && !D.settings.askedNotif) { D.settings.askedNotif = true; save(); setTimeout(() => { try { A.requestNotif(); } catch (e) {} }, 800); }
+})();
+</script>
+</body>
+</html>
