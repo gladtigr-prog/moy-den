@@ -1,0 +1,49 @@
+name: Build APK
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unpack project
+        run: |
+          if [ -f project.zip ]; then unzip -o -q project.zip; fi
+          DIR=$(dirname "$(find . -name settings.gradle -not -path './.git/*' | head -n 1)")
+          echo "Project dir: $DIR"
+          echo "PROJ=$DIR" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build APK
+        working-directory: ${{ env.PROJ }}
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Copy APK
+        run: cp "$PROJ"/app/build/outputs/apk/release/*.apk MyDay.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MyDay-apk
+          path: MyDay.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Мой день — сборка ${{ github.run_number }}
+          files: MyDay.apk
